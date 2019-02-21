@@ -46,7 +46,7 @@ class Word2VecTransformer(BaseEstimator, TransformerMixin):
 
     Examples
     --------
-    >>> from src.word2vec_transformer import Word2VecTransformer
+    >>> from src.transformer.word2vec_transformer import Word2VecTransformer
     >>> X = [['Sample', 'text'], ['another', 'one'], ['last', 'one']]
     >>> # arguments passed to transformer in order to make execution deterministic
     >>> w2v = Word2VecTransformer(size=2, iters=5, workers=1, random_seed=42, min_count=1, window=1, hashfxn=len)
