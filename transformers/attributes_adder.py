@@ -3,15 +3,6 @@ import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 
 
-def test_transformer(X):
-    """ Transformer example
-
-    :param X: Pandas DataFrame containing the training data
-    :return: Array containing the id of each post multiplied by 2.
-    """
-    return X[:, id] * 2
-
-
 class AttributesAdder(BaseEstimator, TransformerMixin):
     def __init__(self, transformers):
         """
@@ -25,6 +16,10 @@ class AttributesAdder(BaseEstimator, TransformerMixin):
         return self
 
     def transform(self, X, y=None):
+        new_features = []
         for transformer in self.transformers:
-            X = np.c_(transformer(X))
-        return X
+            new_feature = []
+            for sentence in X:
+                new_feature.append(transformer(sentence))
+            new_features.append(new_feature)
+        return np.asarray(new_features).T.astype(float)

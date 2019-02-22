@@ -88,7 +88,7 @@ class LexiconManager():
             if lexicon_data is not None:
                 words_used += 1
                 result += float(getattr(lexicon_data, variable))
-        return None if words_used == 0 else result / words_used
+        return 0.5 if words_used == 0 else result / words_used
 
 
 class LexiconRow():
