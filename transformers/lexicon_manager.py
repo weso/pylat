@@ -1,3 +1,4 @@
+from src.exceptions import InvalidArgumentError
 from collections import defaultdict
 
 import csv
@@ -29,9 +30,9 @@ class LexiconManager():
         0.26
     """
     def __init__(self, lexicon_path):
-        self._lexicon = defaultdict()
+        self._lexicon = defaultdict(lambda: None)
         with open(lexicon_path, newline='') as csvfile:
-            lexicon_reader = csv.DictReader(csvfile, delimiter=' ')
+            lexicon_reader = csv.DictReader(csvfile, delimiter='\t')
             for row in lexicon_reader:
                 name = row['Word']
                 valence = row['Valence']
@@ -69,7 +70,7 @@ class LexiconManager():
         :param text: String representation of the text
         :return: float normalized number with the dominance score
         """
-        return self._obtain_lexicon_info('dominance', self)
+        return self._obtain_lexicon_info('dominance', text)
 
     def _obtain_lexicon_info(self, variable, text):
         """ Calculates a specific dimension from the lexicon.
@@ -78,13 +79,15 @@ class LexiconManager():
         :param text: List of tokens which are present in the text.
         :return: float normalized number with the specified score
         """
+        if not isinstance(text, list):
+            raise InvalidArgumentError('text', 'Text must be an iterable of tokens')
         result = 0
         words_used = 0
         for token in text:
             lexicon_data = self._lexicon[token]
             if lexicon_data is not None:
                 words_used += 1
-                result += getattr(lexicon_data, variable)
+                result += float(getattr(lexicon_data, variable))
         return None if words_used == 0 else result / words_used
 
 
