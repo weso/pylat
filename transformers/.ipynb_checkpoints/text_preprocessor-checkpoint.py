@@ -151,7 +151,7 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
         if self.lemmatize:
             tokens = [tok.lemma_.lower().strip() for tok in tokens]
         else:
-            tokens = [tok.text for tok in tokens]
+            tokens = [tok.text.lower().strip() for tok in tokens]
         return tokens
 
     def set_params(self, **parameters):
