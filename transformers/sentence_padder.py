@@ -1,7 +1,7 @@
 import numpy as np
 
 from sklearn.base import BaseEstimator, TransformerMixin
-from .exceptions import InvalidArgumentError
+from src.exceptions import InvalidArgumentError
 
 __author__ = 'Alejandro González Hevia'
 

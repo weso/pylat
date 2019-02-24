@@ -3,7 +3,7 @@ from gensim.models.base_any2vec import BaseWordEmbeddingsModel
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.exceptions import NotFittedError
 
-from .exceptions import InvalidArgumentError
+from src.exceptions import InvalidArgumentError
 
 import numpy as np
 
