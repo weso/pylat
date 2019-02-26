@@ -1,9 +1,6 @@
 from gensim.models import Doc2Vec
-from gensim.models.base_any2vec import BaseWordEmbeddingsModel
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.exceptions import NotFittedError
-
-from src.exceptions import InvalidArgumentError
 
 import numpy as np
 
@@ -59,10 +56,10 @@ class Doc2VecTransformer(BaseEstimator, TransformerMixin):
            [ 0.18679854,  0.23427881]], dtype=float32)
     """
 
-    def __init__(self, fit_corpus, model=None, size=100, alpha=0.025,
+    def __init__(self, fit_corpus=None, model=None, size=100, alpha=0.025,
                  window=5, min_alpha=0.0001, min_count=5, max_vocab_size=None, sample=0.001, random_seed=42,
                  workers=3, epochs=100, hashfxn=hash):
-        self.model = None
+        self.model = model
         self.fit_corpus = fit_corpus
         self.missed_tokens = 0
         self.size = size
