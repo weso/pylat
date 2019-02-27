@@ -56,12 +56,12 @@ class Word2VecTransformer(BaseEstimator, TransformerMixin):
                [[ 0.19643007, -0.08401009], [-0.13900341,  0.18536615]]], dtype=float32)
     """
 
-    def __init__(self, word2vec_class=Word2Vec, fit_corpus=None, size=100, alpha=0.025,
+    def __init__(self, word2vec_class=Word2Vec, model=None, fit_corpus=None, size=100, alpha=0.025,
                  window=5, min_count=5, max_vocab_size=None, sample=0.001, random_seed=42,
                  workers=3, min_alpha=0.0001, sg=0, hs=0, negative=5, ns_exponent=0.75,
                  cbow_mean=1, hashfxn=hash, iters=100, null_word=0, trim_rule=None, sorted_vocab=1,
                  batch_words=10000, compute_loss=False, max_final_vocab=None):
-        self.model = None
+        self.model = model
         self.fit_corpus = fit_corpus
         self.word2vec_class = word2vec_class
         self.missed_tokens = 0
@@ -90,6 +90,8 @@ class Word2VecTransformer(BaseEstimator, TransformerMixin):
 
     def fit(self, x, y=None, **fit_params):
         self._assert_valid_params()
+        if self.model is not None:
+            return self
 
         if self.fit_corpus is None:
             self.fit_corpus = x

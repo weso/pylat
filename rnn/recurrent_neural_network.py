@@ -1,9 +1,9 @@
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.exceptions import NotFittedError
 
-from .rnn_cells import GRUCellFactory
-from .exceptions import InvalidArgumentError
-from .utils import *
+from src.rnn.rnn_cells import GRUCellFactory
+from src.exceptions import InvalidArgumentError
+from src.rnn.utils import *
 
 import numpy as np
 import tensorflow as tf
