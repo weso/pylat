@@ -33,7 +33,7 @@ class GRUCellFactory(BaseCellFactory):
     """Factory that creates variations of the GRU cell."""
 
     def __call__(self, num_units, activation, kernel_init, dropout_rate, layer_norm):
-        gru_cell = tf.nn.rnn_cell.GRUCell(num_units, activation, kernel_initializer=kernel_init)
+        gru_cell = tf.contrib.rnn.GRUCell(num_units, activation)
         if dropout_rate != 0:
             keep_prob = 1 - dropout_rate
             return tf.contrib.rnn.DropoutWrapper(gru_cell, output_keep_prob=keep_prob)

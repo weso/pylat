@@ -67,7 +67,7 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
     >>> X_prep = X
     """
 
-    def __init__(self, num_epochs=100, batch_size=200, num_units=(256,),
+    def __init__(self, num_epochs=30, batch_size=200, num_units=(256,),
                  cell_factory=GRUCellFactory(), activation=None, kernel_initializer=he_init,
                  layer_norm=False, dropout_rate=0.0, learning_rate=1e-4,
                  optimizer=tf.train.AdamOptimizer, logging_level=logging.WARNING,
@@ -85,7 +85,7 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
         self.session = None
         self.logger = logging.getLogger(__name__)
         self.logger.level = logging_level
-        self.save_path = os.path.join(save_dir, self.__repr__(), 'best.ckpt')
+        self.save_path = os.path.join(save_dir, 'best.ckpt')
         self.max_epochs_without_progress = max_epochs_without_progress \
             if max_epochs_without_progress is not None \
             else num_epochs
@@ -99,6 +99,7 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
         # graph = tf.Graph()
         # with graph.as_default():
         tf.reset_default_graph()
+        tf.set_random_seed(42un)
         self._build_graph(max_length, embedding_size, num_classes)
         self.session = tf.Session()  # (graph=graph)
 
@@ -107,8 +108,9 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
 
         split_point = math.floor(num_samples * 0.85)
         x_train, x_val, y_train, y_val = x[:split_point], x[split_point:], y[:split_point], y[split_point:]
-
         self._train_loop(x_train, x_val, y_train, y_val)
+        
+        self.logger.info('Restoring checkpoint of best model...')
         self.saver.restore(self.session, self.save_path)
 
     def _train_loop(self, x_train, x_val, y_train, y_val):
@@ -144,9 +146,10 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
                 if epochs_without_progress > self.max_epochs_without_progress:
                     self.logger.info('No progress after %s epochs. Stopping...', self.max_epochs_without_progress)
                     break
+            print('{}\t - Loss: {:.7f} - Best loss: {:.7f} - Val Accuracy: {:.3f} - Train Accuracy: {:.3f}'
+                             .format(epoch, loss, best_loss, accuracy * 100, train_accuracy * 100))
             self.logger.info('{}\t - Loss: {:.7f} - Best loss: {:.7f} - Val Accuracy: {:.3f} - Train Accuracy: {:.3f}'
                              .format(epoch, loss, best_loss, accuracy * 100, train_accuracy * 100))
-        self.logger.info('Restoring checkpoint of best model...')
 
     def predict(self, x):
         self.logger.info('Predict x: %s', np.shape(x))
@@ -168,10 +171,7 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
     def _build_graph(self, num_steps, embedding_size, num_classes):
         self.logger.info('Building graph. Num steps: %s, embedding size: %s', num_steps, embedding_size)
 
-        word_vectors = np.load('word_vectors.npy')
-        input_data = tf.placeholder(tf.float32, shape=[None, num_steps], name='input_data')
-        x_t = tf.Variable(tf.zeros([None, num_steps, embedding_size]), name='x_input')
-        x_t = tf.nn.embedding_lookup(word_vectors, input_data)
+        x_t = tf.placeholder(tf.float32, shape=[None, num_steps, embedding_size], name='x_input')
         y_t = tf.placeholder(tf.int64, shape=[None], name='y_input')
 
         with tf.name_scope('dnn'):

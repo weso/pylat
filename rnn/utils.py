@@ -1,6 +1,6 @@
 import tensorflow as tf
 
-he_init = tf.variance_scaling_initializer()
+he_init = tf.contrib.layers.variance_scaling_initializer()
 
 
 def get_next_batch(x, y, batch_idx, batch_size):

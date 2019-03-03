@@ -49,13 +49,14 @@ class SentencePadder(BaseEstimator, TransformerMixin):
         if self.padding_length is not None and self.padding_length < max_length:
             raise InvalidArgumentError('padding_length', 'Padding length must be greater \
                                                           or equal to the maximum sentence length.')
+        elif self.padding_length is None:
+            self.padding_length = max_length
         return self
 
     def transform(self, x):
         num_instances = len(x)
-        max_length = len(max(x, key=len)) if not self.padding_length else self.padding_length
         embedding_size = len(x[0][0])
-        ret = np.zeros(shape=[num_instances, max_length, embedding_size], dtype=np.float32)
+        ret = np.zeros(shape=[num_instances, self.padding_length, embedding_size], dtype=np.float32)
         for idx, sentence in enumerate(x):
             if len(sentence) != 0:
                 ret[idx, :len(sentence), :] = sentence
