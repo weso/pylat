@@ -1,5 +1,4 @@
 from src.exceptions import InvalidArgumentError
-from collections import defaultdict
 
 import csv
 
@@ -30,7 +29,7 @@ class LexiconManager():
         0.26
     """
     def __init__(self, lexicon_path):
-        self._lexicon = defaultdict(lambda: None)
+        self._lexicon = dict()
         with open(lexicon_path, newline='') as csvfile:
             lexicon_reader = csv.DictReader(csvfile, delimiter='\t')
             for row in lexicon_reader:
@@ -84,7 +83,7 @@ class LexiconManager():
         result = 0
         words_used = 0
         for token in text:
-            lexicon_data = self._lexicon[token]
+            lexicon_data = self._lexicon.get(token)
             if lexicon_data is not None:
                 words_used += 1
                 result += float(getattr(lexicon_data, variable))

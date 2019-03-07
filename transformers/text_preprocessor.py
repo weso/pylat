@@ -73,7 +73,7 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
 
     def __init__(self, spacy_model_id='en', additional_pipes=None,
                  remove_stop_words=False, lemmatize=False,
-                 disable=()):
+                 disable=(), custom_nlp=None):
         self.spacy_model_id = spacy_model_id
         self.remove_stop_words = remove_stop_words
         self.lemmatize = lemmatize
@@ -82,7 +82,7 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
             additional_pipes = []
         self.additional_pipes = additional_pipes
         self.disable = disable
-        self.custom_nlp = None
+        self.custom_nlp = custom_nlp
 
     @property
     def nlp(self):
@@ -154,6 +154,16 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
             tokens = [tok.text.lower().strip() for tok in tokens]
         return tokens
 
+    def get_params(self, deep=True):
+        return {
+            "spacy_model_id": self.spacy_model_id,
+            "custom_nlp": self.custom_nlp,
+            "remove_stop_words": self.remove_stop_words,
+            "lemmatize": self.lemmatize,
+            "additional_pipes": self.additional_pipes,
+            "disable": self.disable
+        }
+    
     def set_params(self, **parameters):
         for parameter, value in parameters.items():
             if parameter == 'additional_pipes' and value is None:

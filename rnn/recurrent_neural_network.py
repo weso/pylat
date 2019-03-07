@@ -1,5 +1,6 @@
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.exceptions import NotFittedError
+from tensorflow.python.saved_model import tag_constants
 
 from src.rnn.rnn_cells import GRUCellFactory
 from src.exceptions import InvalidArgumentError
@@ -99,7 +100,7 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
         # graph = tf.Graph()
         # with graph.as_default():
         tf.reset_default_graph()
-        tf.set_random_seed(42un)
+        tf.set_random_seed(42)
         self._build_graph(max_length, embedding_size, num_classes)
         self.session = tf.Session()  # (graph=graph)
 
@@ -151,6 +152,22 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
             self.logger.info('{}\t - Loss: {:.7f} - Best loss: {:.7f} - Val Accuracy: {:.3f} - Train Accuracy: {:.3f}'
                              .format(epoch, loss, best_loss, accuracy * 100, train_accuracy * 100))
 
+    def save(self, save_path):
+        inputs = {"x_t": self._x_t}
+        outputs = {"pred_proba": self._y_proba}
+        tf.saved_model.simple_save(self.session, save_path, inputs, outputs)
+       
+    def restore(self, save_path):
+        graph = tf.Graph()
+        self.session = tf.Session(graph=graph)
+        tf.saved_model.loader.load(
+            self.session,
+            [tag_constants.SERVING],
+            save_path,
+        )
+        self._x_t = graph.get_tensor_by_name('x_input:0')
+        self._y_proba = graph.get_tensor_by_name('dnn/y_proba:0')
+            
     def predict(self, x):
         self.logger.info('Predict x: %s', np.shape(x))
         if self.session is None:
@@ -176,7 +193,7 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
 
         with tf.name_scope('dnn'):
             logits = self._rnn(x_t, num_classes)
-            softmax = tf.nn.softmax(logits)
+            softmax = tf.nn.softmax(logits, name='y_proba')
 
         with tf.name_scope('loss'):
             xent = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=y_t, logits=logits, name='cross_entropy')
