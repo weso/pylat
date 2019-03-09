@@ -17,11 +17,10 @@ class LSTMCellFactory(BaseCellFactory):
 
     def __call__(self, num_units, activation, kernel_init, dropout_rate, layer_norm):
         if layer_norm:
-            return tf.contrib.rnn.LayerNormBasicLSTMCell(num_units, activation=activation,
-                                                         layer_norm=True, dropout_keep_prob=1-dropout_rate)
+            return tf.contrib.rnn.LayerNormBasicLSTMCell(num_units, layer_norm=True,
+                                                         dropout_keep_prob=1-dropout_rate)
         else:
-            lstm_cell = tf.nn.rnn_cell.LSTMCell(num_units, activation=activation, initializer=kernel_init)
-
+            lstm_cell = tf.contrib.rnn.LSTMCell(num_units, initializer=kernel_init)
             if dropout_rate:
                 keep_prob = 1 - dropout_rate
                 return tf.contrib.rnn.DropoutWrapper(lstm_cell, output_keep_prob=keep_prob)
@@ -45,4 +44,4 @@ class SimpleCellFactory(BaseCellFactory):
     """Factory that creates variations of a basic rnn cell."""
 
     def __call__(self, num_units, activation, kernel_init, dropout_rate, layer_norm):
-        return tf.nn.rnn_cell.BasicRNNCell(num_units, activation)
+        return tf.nn.rnn_cell.BasicRNNCell(num_units)

@@ -1,5 +1,6 @@
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.exceptions import NotFittedError
+from sklearn.model_selection import train_test_split
 from tensorflow.python.saved_model import tag_constants
 
 from src.rnn.rnn_cells import GRUCellFactory
@@ -72,7 +73,7 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
                  cell_factory=GRUCellFactory(), activation=None, kernel_initializer=he_init,
                  layer_norm=False, dropout_rate=0.0, learning_rate=1e-4,
                  optimizer=tf.train.AdamOptimizer, logging_level=logging.WARNING,
-                 save_dir='results/rnn', max_epochs_without_progress=None):
+                 save_dir='results/rnn', max_epochs_without_progress=None, early_stopping=True):
         self.num_epochs = num_epochs
         self.batch_size = batch_size
         self.num_units = num_units
@@ -86,7 +87,9 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
         self.session = None
         self.logger = logging.getLogger(__name__)
         self.logger.level = logging_level
-        self.save_path = os.path.join(save_dir, 'best.ckpt')
+        self.save_dir = save_dir
+        self.save_path = os.path.join(self.save_dir, 'best.ckpt')
+        self.early_stopping = early_stopping
         self.max_epochs_without_progress = max_epochs_without_progress \
             if max_epochs_without_progress is not None \
             else num_epochs
@@ -107,9 +110,11 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
         self.logger.info('Fitting %s...', str(self))
         self.logger.info('X shape: %s', np.shape(x))
 
-        split_point = math.floor(num_samples * 0.85)
-        x_train, x_val, y_train, y_val = x[:split_point], x[split_point:], y[:split_point], y[split_point:]
-        self._train_loop(x_train, x_val, y_train, y_val)
+        if self.early_stopping:
+            x_train, x_val, y_train, y_val = train_test_split(x, y, test_size=0.2, stratify=y)
+            self._train_loop(x_train, x_val, y_train, y_val)
+        else:
+            self._train_loop(x, None, y, None)
         
         self.logger.info('Restoring checkpoint of best model...')
         self.saver.restore(self.session, self.save_path)
@@ -133,24 +138,26 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
                 train_accuracy += batch_accuracy
             train_accuracy /= num_batches
 
-            loss, accuracy = self.session.run([self._loss_op, self._accuracy], feed_dict={
-                self._x_t: x_val,
-                self._y_t: y_val
-            })
+            if x_val is not None:
+                loss, accuracy = self.session.run([self._loss_op, self._accuracy], feed_dict={
+                    self._x_t: x_val,
+                    self._y_t: y_val
+                })
 
-            if loss < best_loss:
-                best_loss = loss
-                epochs_without_progress = 0
-                self.saver.save(self.session, self.save_path)
+                if loss < best_loss:
+                    best_loss = loss
+                    epochs_without_progress = 0
+                    self.saver.save(self.session, self.save_path)
+                else:
+                    epochs_without_progress += 1
+                    if epochs_without_progress > self.max_epochs_without_progress:
+                        self.logger.info('No progress after %s epochs. Stopping...', self.max_epochs_without_progress)
+                        break
+                self.logger.info('{}\t - Loss: {:.7f} - Best loss: {:.7f} - Val Accuracy: {:.3f} - Train Accuracy: {:.3f}'
+                                 .format(epoch, loss, best_loss, accuracy * 100, train_accuracy * 100))
             else:
-                epochs_without_progress += 1
-                if epochs_without_progress > self.max_epochs_without_progress:
-                    self.logger.info('No progress after %s epochs. Stopping...', self.max_epochs_without_progress)
-                    break
-            print('{}\t - Loss: {:.7f} - Best loss: {:.7f} - Val Accuracy: {:.3f} - Train Accuracy: {:.3f}'
-                             .format(epoch, loss, best_loss, accuracy * 100, train_accuracy * 100))
-            self.logger.info('{}\t - Loss: {:.7f} - Best loss: {:.7f} - Val Accuracy: {:.3f} - Train Accuracy: {:.3f}'
-                             .format(epoch, loss, best_loss, accuracy * 100, train_accuracy * 100))
+                print('{}\t - Accuracy: {:.3f}'.format(epoch, train_accuracy*100))
+                self.saver.save(self.session, self.save_path)
 
     def save(self, save_path):
         inputs = {"x_t": self._x_t}
@@ -241,7 +248,6 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
             # single layer
             final_cell = self.cell_factory(self.num_units[0], self.activation, self.kernel_initializer,
                                            self.dropout_rate, self.layer_norm)
-
         rnn_output, _ = tf.nn.dynamic_rnn(final_cell, inputs,
                                           sequence_length=get_length_tensor(inputs),
                                           dtype=tf.float32)
