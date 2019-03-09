@@ -163,7 +163,7 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
             "additional_pipes": self.additional_pipes,
             "disable": self.disable
         }
-    
+
     def set_params(self, **parameters):
         for parameter, value in parameters.items():
             if parameter == 'additional_pipes' and value is None:

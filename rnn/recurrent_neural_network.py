@@ -5,13 +5,13 @@ from tensorflow.python.saved_model import tag_constants
 
 from src.rnn.rnn_cells import GRUCellFactory
 from src.exceptions import InvalidArgumentError
-from src.rnn.utils import *
+from src.rnn.utils import get_length_tensor, get_next_batch, \
+                          he_init, last_relevant
 
 import numpy as np
 import tensorflow as tf
 
 import logging
-import math
 import os
 
 
@@ -70,10 +70,12 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
     """
 
     def __init__(self, num_epochs=30, batch_size=200, num_units=(256,),
-                 cell_factory=GRUCellFactory(), activation=None, kernel_initializer=he_init,
-                 layer_norm=False, dropout_rate=0.0, learning_rate=1e-4,
-                 optimizer=tf.train.AdamOptimizer, logging_level=logging.WARNING,
-                 save_dir='results/rnn', max_epochs_without_progress=None, early_stopping=True):
+                 cell_factory=GRUCellFactory(), activation=None,
+                 kernel_initializer=he_init, layer_norm=False,
+                 dropout_rate=0.0, learning_rate=1e-4,
+                 optimizer=tf.train.AdamOptimizer, save_dir='results/rnn',
+                 logging_level=logging.WARNING, early_stopping=True,
+                 max_epochs_without_progress=None):
         self.num_epochs = num_epochs
         self.batch_size = batch_size
         self.num_units = num_units
@@ -95,17 +97,14 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
             else num_epochs
 
     def fit(self, x, y=None, **fit_params):
-        num_samples = np.shape(x)[0]
         embedding_size = len(x[0][0])
         num_classes = len(np.unique(y))
         max_length = len(max(x, key=len))
 
-        # graph = tf.Graph()
-        # with graph.as_default():
         tf.reset_default_graph()
         tf.set_random_seed(42)
         self._build_graph(max_length, embedding_size, num_classes)
-        self.session = tf.Session()  # (graph=graph)
+        self.session = tf.Session()
 
         self.logger.info('Fitting %s...', str(self))
         self.logger.info('X shape: %s', np.shape(x))
@@ -115,7 +114,7 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
             self._train_loop(x_train, x_val, y_train, y_val)
         else:
             self._train_loop(x, None, y, None)
-        
+
         self.logger.info('Restoring checkpoint of best model...')
         self.saver.restore(self.session, self.save_path)
 
@@ -151,19 +150,25 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
                 else:
                     epochs_without_progress += 1
                     if epochs_without_progress > self.max_epochs_without_progress:
-                        self.logger.info('No progress after %s epochs. Stopping...', self.max_epochs_without_progress)
+                        self.logger.info('No progress after %s epochs. '
+                                         'Stopping...',
+                                         self.max_epochs_without_progress)
                         break
-                self.logger.info('{}\t - Loss: {:.7f} - Best loss: {:.7f} - Val Accuracy: {:.3f} - Train Accuracy: {:.3f}'
-                                 .format(epoch, loss, best_loss, accuracy * 100, train_accuracy * 100))
+                self.logger.info('Epoch {}\t - Loss: {:.7f} - Best loss: '
+                                 '{:.7f} - Val Accuracy: {:.3f} - Train Accura'
+                                 'cy: {:.3f}'.format(epoch, loss, best_loss,
+                                                     accuracy * 100,
+                                                     train_accuracy * 100))
             else:
-                print('{}\t - Accuracy: {:.3f}'.format(epoch, train_accuracy*100))
+                self.logger.info('Epoch: {}\t - Accuracy: {:.3f}'.format(
+                                epoch, train_accuracy*100))
                 self.saver.save(self.session, self.save_path)
 
     def save(self, save_path):
         inputs = {"x_t": self._x_t}
         outputs = {"pred_proba": self._y_proba}
         tf.saved_model.simple_save(self.session, save_path, inputs, outputs)
-       
+
     def restore(self, save_path):
         graph = tf.Graph()
         self.session = tf.Session(graph=graph)
@@ -174,7 +179,7 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
         )
         self._x_t = graph.get_tensor_by_name('x_input:0')
         self._y_proba = graph.get_tensor_by_name('dnn/y_proba:0')
-            
+
     def predict(self, x):
         self.logger.info('Predict x: %s', np.shape(x))
         if self.session is None:
