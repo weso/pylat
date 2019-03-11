@@ -20,6 +20,7 @@ class CrossEmbeddingsTransformer(BaseEstimator, TransformerMixin):
         self.embeddings_dict = {}
 
     def fit(self, x, y=None, **fit_params):
+        # TODO: load vectors lazily, when transform needs them
         self._load_vectors()
         return self
 
@@ -42,9 +43,9 @@ class CrossEmbeddingsTransformer(BaseEstimator, TransformerMixin):
 
         ret = []
         for sentence in x:
-            sentence_vector = embeddings.query(sentence)
-            ret.append(sentence_vector)
-
+            ret.append(np.asarray([embeddings.query(word)
+                                   for word in sentence
+                                   if word in embeddings]))
         return np.asarray(ret)
 
     def _load_vectors(self):
@@ -56,7 +57,7 @@ class CrossEmbeddingsTransformer(BaseEstimator, TransformerMixin):
 
     def _assert_valid_file(self, file):
         tokens = file.split('.')
-        if len(tokens != 2 or tokens[-1] != 'magnitude'):
+        if len(tokens) != 2 or tokens[-1] != 'magnitude':
             raise InvalidArgumentError(self.embeddings_dir, 'All files inside '
                                        'the given directory must have the form'
                                        ' $lang$.magnitude.')

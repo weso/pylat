@@ -74,8 +74,8 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
                  kernel_initializer=he_init, layer_norm=False,
                  dropout_rate=0.0, learning_rate=1e-4,
                  optimizer=tf.train.AdamOptimizer, save_dir='results/rnn',
-                 logging_level=logging.WARNING, early_stopping=True,
-                 max_epochs_without_progress=None):
+                 logging_level=logging.DEBUG, early_stopping=True,
+                 max_epochs_without_progress=None, random_seed=42):
         self.num_epochs = num_epochs
         self.batch_size = batch_size
         self.num_units = num_units
@@ -88,10 +88,11 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
         self.optimizer = optimizer
         self.session = None
         self.logger = logging.getLogger(__name__)
-        self.logger.level = logging_level
+        self.logger.setLevel(logging.INFO)
         self.save_dir = save_dir
         self.save_path = os.path.join(self.save_dir, 'best.ckpt')
         self.early_stopping = early_stopping
+        self.random_seed = random_seed
         self.max_epochs_without_progress = max_epochs_without_progress \
             if max_epochs_without_progress is not None \
             else num_epochs
@@ -102,7 +103,7 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
         max_length = len(max(x, key=len))
 
         tf.reset_default_graph()
-        tf.set_random_seed(42)
+        tf.set_random_seed(self.random_seed)
         self._build_graph(max_length, embedding_size, num_classes)
         self.session = tf.Session()
 
@@ -110,7 +111,8 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
         self.logger.info('X shape: %s', np.shape(x))
 
         if self.early_stopping:
-            x_train, x_val, y_train, y_val = train_test_split(x, y, test_size=0.2, stratify=y)
+            x_train, x_val, y_train, y_val = train_test_split(x, y, test_size=0.2,
+                                                              stratify=y, random_state=self.random_seed)
             self._train_loop(x_train, x_val, y_train, y_val)
         else:
             self._train_loop(x, None, y, None)
