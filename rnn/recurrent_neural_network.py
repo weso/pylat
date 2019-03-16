@@ -133,7 +133,8 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
                                                   batch_idx, self.batch_size)
                 feed_dict = {
                     self._x_t: x_batch,
-                    self._y_t: y_batch
+                    self._y_t: y_batch,
+                    self.keep_prob: 1 - self.dropout_rate
                 }
                 _, batch_accuracy = self.session.run([self._train_op, self._accuracy], feed_dict=feed_dict)
                 train_accuracy += batch_accuracy
@@ -204,9 +205,10 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
 
         x_t = tf.placeholder(tf.float32, shape=[None, num_steps, embedding_size], name='x_input')
         y_t = tf.placeholder(tf.int64, shape=[None], name='y_input')
+        keep_prob = tf.placeholder_with_default(1.0, shape=())
 
         with tf.name_scope('dnn'):
-            logits = self._rnn(x_t, num_classes)
+            logits = self._rnn(x_t, keep_prob, num_classes)
             softmax = tf.nn.softmax(logits, name='y_proba')
 
         with tf.name_scope('loss'):
@@ -224,11 +226,11 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
 
         init = tf.global_variables_initializer()
         saver = tf.train.Saver()
-
         self.logger.info('Graph built correctly')
 
         self._x_t = x_t
         self._y_t = y_t
+        self.keep_prob = keep_prob
         self._y_proba = softmax
         self._loss_op = loss_op
         self._train_op = train_op
@@ -243,18 +245,20 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
         elif len(self.num_units) == 0:
             raise InvalidArgumentError('num_units', 'Length of num units must be greater than zero')
 
-    def _rnn(self, inputs, num_classes):
-        # TODO: check if we need to pass is_training tensor to cell factory
+    def _rnn(self, inputs, keep_prob, num_classes):
+        use_dropout = True if self.dropout_rate == 0 else False
+        print('Use dropout', use_dropout)
+
         if len(self.num_units) > 1:
             # multiple layers
             cells = [self.cell_factory(units, self.activation, self.kernel_initializer,
-                                       self.dropout_rate, self.layer_norm)
+                                       use_dropout, keep_prob, self.layer_norm)
                      for units in self.num_units]
             final_cell = tf.contrib.rnn.MultiRNNCell(cells)
         else:
             # single layer
             final_cell = self.cell_factory(self.num_units[0], self.activation, self.kernel_initializer,
-                                           self.dropout_rate, self.layer_norm)
+                                           use_dropout, keep_prob, self.layer_norm)
         rnn_output, _ = tf.nn.dynamic_rnn(final_cell, inputs,
                                           sequence_length=get_length_tensor(inputs),
                                           dtype=tf.float32)
