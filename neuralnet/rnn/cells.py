@@ -1,4 +1,4 @@
-from abc import *
+from abc import ABC, abstractmethod
 import tensorflow as tf
 
 __author__ = 'Alejandro González Hevia'

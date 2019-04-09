@@ -1,3 +1,4 @@
+import functools
 import tensorflow as tf
 
 he_init = tf.contrib.layers.variance_scaling_initializer()
@@ -45,3 +46,16 @@ def get_length_tensor(sequence):
     used = tf.sign(tf.reduce_max(tf.abs(sequence), 2))
     length = tf.reduce_sum(used, 1)
     return tf.cast(length, tf.int32)
+
+
+def lazy_property(func):
+    attribute = '_cache_' + func.__name__
+
+    @property
+    @functools.wraps(func)
+    def decorator(self):
+        if not hasattr(self, attribute):
+            setattr(self, attribute, func(self))
+        return getattr(self, attribute)
+
+    return decorator
