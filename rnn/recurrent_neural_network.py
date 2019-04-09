@@ -75,7 +75,8 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
                  dropout_rate=0.0, learning_rate=1e-4,
                  optimizer=tf.train.AdamOptimizer, save_dir='results/rnn',
                  logging_level=logging.DEBUG, early_stopping=True,
-                 max_epochs_without_progress=None, random_seed=42):
+                 max_epochs_without_progress=None, random_seed=42,
+                 embeddings=None, validation_data=None):
         self.num_epochs = num_epochs
         self.batch_size = batch_size
         self.num_units = num_units
@@ -93,27 +94,26 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
         self.save_path = os.path.join(self.save_dir, 'best.ckpt')
         self.early_stopping = early_stopping
         self.random_seed = random_seed
+        self.w2v_embeddings = embeddings
+        self.validation_data = validation_data
         self.max_epochs_without_progress = max_epochs_without_progress \
             if max_epochs_without_progress is not None \
             else num_epochs
 
     def fit(self, x, y=None, **fit_params):
-        embedding_size = len(x[0][0])
         num_classes = len(np.unique(y))
         max_length = len(max(x, key=len))
 
         tf.reset_default_graph()
         tf.set_random_seed(self.random_seed)
-        self._build_graph(max_length, embedding_size, num_classes)
+        self._build_graph(max_length, num_classes)
         self.session = tf.Session()
 
         self.logger.info('Fitting %s...', str(self))
         self.logger.info('X shape: %s', np.shape(x))
 
-        if self.early_stopping:
-            x_train, x_val, y_train, y_val = train_test_split(x, y, test_size=0.2,
-                                                              stratify=y, random_state=self.random_seed)
-            self._train_loop(x_train, x_val, y_train, y_val)
+        if self.validation_data:
+            self._train_loop(x, self.validation_data[0], y, self.validation_data[1])
         else:
             self._train_loop(x, None, y, None)
 
@@ -152,11 +152,11 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
                     self.saver.save(self.session, self.save_path)
                 else:
                     epochs_without_progress += 1
-                    if epochs_without_progress > self.max_epochs_without_progress:
+                    if self.early_stopping and epochs_without_progress > self.max_epochs_without_progress:
                         self.logger.info('No progress after %s epochs. '
                                          'Stopping...',
                                          self.max_epochs_without_progress)
-                        break
+                        return
                 self.logger.info('Epoch {}\t - Loss: {:.7f} - Best loss: '
                                  '{:.7f} - Val Accuracy: {:.3f} - Train Accura'
                                  'cy: {:.3f}'.format(epoch, loss, best_loss,
@@ -200,15 +200,21 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
                 self._x_t: x
             })
 
-    def _build_graph(self, num_steps, embedding_size, num_classes):
-        self.logger.info('Building graph. Num steps: %s, embedding size: %s', num_steps, embedding_size)
+    def _build_graph(self, num_steps, num_classes):
+        self.logger.info('Building graph. Num steps: %s', num_steps)
 
-        x_t = tf.placeholder(tf.float32, shape=[None, num_steps, embedding_size], name='x_input')
+        x_t = tf.placeholder(tf.int64, shape=[None, num_steps], name='x_input')
         y_t = tf.placeholder(tf.int64, shape=[None], name='y_input')
         keep_prob = tf.placeholder_with_default(1.0, shape=())
 
+        with tf.name_scope('embeddings'):
+            np_emb = np.array(self.w2v_embeddings)
+            embeddings = tf.get_variable(name="W", shape=np_emb.shape, trainable=False,
+                                         initializer=tf.constant_initializer(np_emb))
+            rnn_inputs = tf.nn.embedding_lookup(embeddings, x_t)
+
         with tf.name_scope('dnn'):
-            logits = self._rnn(x_t, keep_prob, num_classes)
+            logits = self._rnn(rnn_inputs, keep_prob, num_classes)
             softmax = tf.nn.softmax(logits, name='y_proba')
 
         with tf.name_scope('loss'):
@@ -246,26 +252,32 @@ class RecurrentNeuralNetwork(BaseEstimator, ClassifierMixin):
             raise InvalidArgumentError('num_units', 'Length of num units must be greater than zero')
 
     def _rnn(self, inputs, keep_prob, num_classes):
-        use_dropout = True if self.dropout_rate == 0 else False
-        print('Use dropout', use_dropout)
-
-        if len(self.num_units) > 1:
-            # multiple layers
-            cells = [self.cell_factory(units, self.activation, self.kernel_initializer,
-                                       use_dropout, keep_prob, self.layer_norm)
-                     for units in self.num_units]
-            final_cell = tf.contrib.rnn.MultiRNNCell(cells)
-        else:
-            # single layer
-            final_cell = self.cell_factory(self.num_units[0], self.activation, self.kernel_initializer,
-                                           use_dropout, keep_prob, self.layer_norm)
-        rnn_output, _ = tf.nn.dynamic_rnn(final_cell, inputs,
-                                          sequence_length=get_length_tensor(inputs),
-                                          dtype=tf.float32)
-        last = last_relevant(rnn_output, get_length_tensor(inputs))
-
+        #use_dropout = True if self.dropout_rate == 0 else False
+        #
+        #if len(self.num_units) > 1:
+        #    # multiple layers
+        #    cells = [self.cell_factory(units, self.activation, self.kernel_initializer,
+        #                               use_dropout, keep_prob, self.layer_norm)
+        #             for units in self.num_units]
+        #    final_cell = tf.contrib.rnn.MultiRNNCell(cells)
+        #else:
+        #    # single layer
+        #    final_cell = self.cell_factory(self.num_units[0], self.activation, self.kernel_initializer,
+        #                                   use_dropout, keep_prob, self.layer_norm)
+        #rnn_output, _ = tf.nn.dynamic_rnn(final_cell, inputs,
+        #                                  sequence_length=get_length_tensor(inputs),
+        #                                  dtype=tf.float32)
+        #last = last_relevant(rnn_output, get_length_tensor(inputs))
+        #
+        #with tf.name_scope('fc_layer'):
+        #    fc = tf.layers.dense(last, 100, kernel_initializer=self.kernel_initializer)
+        #    output = tf.layers.dense(fc, num_classes, kernel_initializer=self.kernel_initializer)
+        #return output
+        rnn_out = tf.keras.layers.Bidirectional(tf.keras.layers.LSTM(256, dropout=0.4))(inputs)
+        
         with tf.name_scope('fc_layer'):
-            output = tf.layers.dense(last, num_classes, kernel_initializer=self.kernel_initializer)
+            fc = tf.keras.layers.Dense(100, activation='relu')(rnn_out)
+            output = tf.keras.layers.Dense(num_classes)(fc)
         return output
 
     def __repr__(self):
