@@ -8,7 +8,7 @@ from .utils import get_next_batch
 
 
 class BaseTrainer(ABC):
-    def __init__(self, model, batch_size=30, num_epochs=200):
+    def __init__(self, model, num_epochs=200, batch_size=30):
         self.model = model
         self.batch_size = batch_size
         self.num_epochs = num_epochs
@@ -16,10 +16,12 @@ class BaseTrainer(ABC):
         self.y_train = []
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
+        self.saver = None
 
     def train(self, X, y):
         self.logger.info('Creating model...')
         self.model.init_model(X, y)
+        self.saver = tf.train.Saver()
 
         self.logger.info('Starting training...')
         self._train_loop(X, y)
@@ -28,9 +30,9 @@ class BaseTrainer(ABC):
     def _train_loop(self, X, y):
         self.on_train_loop_started(X, y)
         num_batches = len(self.X_train) // self.batch_size
-        self.model.session.run(self._init)
         for epoch in range(self.num_epochs):
             self._epoch_loop(epoch, num_batches)
+        self.saver.restore(self.model.session, self.model.save_path)
 
     def _epoch_loop(self, num_epoch, num_batches):
         self.logger.info('Epoch: {}'.format(num_epoch))
@@ -41,11 +43,11 @@ class BaseTrainer(ABC):
                                               batch_idx, self.batch_size)
             feed_dict = {
                 self.model.x_t: x_batch,
-                self.model.y_t: y_batch,
-                self.model.keep_prob: 1 - self.model.dropout_rate
+                self.model.y_t: y_batch
             }
-            batch_loss, batch_accuracy = self.model.session.run(
-                [self.model._train_op, self.model._accuracy], feed_dict=feed_dict)
+            _, batch_loss, batch_accuracy = self.model.session.run(
+                [self.model.optimize, self.model.loss, self.model.error],
+                feed_dict=feed_dict)
             train_accuracy += batch_accuracy
             train_loss += batch_loss
         train_accuracy /= num_batches
@@ -61,15 +63,15 @@ class BaseTrainer(ABC):
     def on_epoch_finished(self, loss, acc):
         self.logger.info('Train: Loss = {:.3f} - Accuracy = {:.3f}'.format(
             loss, acc * 100))
-        self.model.on_epoch_finished(loss, acc)
 
 
 class EarlyStoppingTrainer(BaseTrainer):
     def __init__(self, model, batch_size, num_epochs,
-                 validation_split=0.2, max_epochs_no_progress=5,
-                 random_seed=42):
-        super(BaseTrainer, self).__init__(model, batch_size, num_epochs)
+                 validation_split=0.2, validation_data=None,
+                 max_epochs_no_progress=5, random_seed=42):
+        super().__init__(model, batch_size, num_epochs)
         self.validation_split = validation_split
+        self.validation_data = validation_data
         self.max_epochs_without_progress = max_epochs_no_progress
         self.random_seed = random_seed
         self.best_loss = np.inf
@@ -78,18 +80,25 @@ class EarlyStoppingTrainer(BaseTrainer):
         self.y_val = []
 
     def on_train_loop_started(self, X, y):
-        self.X_train, self.X_val, self.y_train, self.y_val = \
-            train_test_split(X, y, test_size=self.validation_split,
-                             random_state=self.random_seed)
+        if self.validation_data is None:
+            self.X_train, self.X_val, self.y_train, self.y_val = \
+                train_test_split(X, y, test_size=self.validation_split,
+                                 random_state=self.random_seed)
+        else:
+            self.X_val = self.validation_data[0]
+            self.y_val = self.validation_data[1]
+            self.X_train = X
+            self.y_train = y
 
     def on_epoch_finished(self, loss, acc):
         val_loss, val_acc = self.model.session.run(
-            [self._loss_op, self._accuracy],
-            feed_dict={self._x_t: self.X_val, self._y_t: self.y_val})
+            [self.model.loss, self.model.error],
+            feed_dict={self.model.x_t: self.X_val, self.model.y_t: self.y_val})
 
         if val_loss < self.best_loss:
             self.best_loss = val_loss
             self.epochs_without_progress = 0
+            self.saver.save(self.model.session, self.model.save_path)
         else:
             self.epochs_without_progress += 1
             if self.epochs_without_progress > self.max_epochs_without_progress:

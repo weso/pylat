@@ -12,19 +12,22 @@ class BaseNeuralNetwork(ABC):
         self.save_dir = save_dir
         self.save_path = os.path.join(self.save_dir, 'best.ckpt')
         self.session = None
-        self._x_t = None
-        self._y_t = None
+        self.x_t = None
+        self.y_t = None
         self._logits = None
+        self.init = None
 
     def init_model(self, X, y):
         self.session = tf.Session()
-        self.prediction()
-        self.optimize()
-        self.error()
+        self.prediction
+        self.optimize
+        self.error
+        self.init = tf.global_variables_initializer()
+        self.session.run(self.init)
 
     def save(self, save_path):
-        inputs = {"x_t": self._x_t}
-        outputs = {"pred_proba": self._y_proba}
+        inputs = {"x_t": self.x_t}
+        outputs = {"pred_proba": self.prediction}
         tf.saved_model.simple_save(self.session, save_path, inputs, outputs)
 
     def restore(self, save_path):
@@ -35,12 +38,17 @@ class BaseNeuralNetwork(ABC):
             [tag_constants.SERVING],
             save_path,
         )
-        self._x_t = graph.get_tensor_by_name('x_input:0')
-        self._y_proba = graph.get_tensor_by_name('dnn/y_proba:0')
+        self.x_t = graph.get_tensor_by_name('x_input:0')
+        self.y_proba = graph.get_tensor_by_name('dnn/y_proba:0')
 
     @lazy_property
     @abstractmethod
     def prediction(self):
+        pass
+
+    @lazy_property
+    @abstractmethod
+    def loss(self):
         pass
 
     @lazy_property

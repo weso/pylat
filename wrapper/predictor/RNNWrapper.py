@@ -19,15 +19,18 @@ class RNNWrapper(BaseEstimator, ClassifierMixin):
                  dropout_rate=0.0, learning_rate=1e-4,
                  optimizer=tf.train.AdamOptimizer, save_dir='results',
                  random_seed=42, embeddings=None, early_stopping=False,
-                 validation_split=0.2, max_epochs_no_progress=5):
+                 validation_split=0.2, validation_data=None,
+                 max_epochs_no_progress=5):
         self.model = RecurrentNeuralNetwork(num_units, cell_factory, activation,
                                             kernel_initializer, layer_norm,
                                             dropout_rate, learning_rate,
                                             optimizer, save_dir, random_seed,
                                             embeddings)
-        self.trainer = BaseTrainer(num_epochs, batch_size) if early_stopping \
-            else EarlyStoppingTrainer(num_epochs, batch_size,
-                                      validation_split, max_epochs_no_progress)
+        self.trainer = BaseTrainer(self.model, num_epochs, batch_size) \
+            if early_stopping \
+            else EarlyStoppingTrainer(self.model, num_epochs, batch_size,
+                                      validation_split, validation_data,
+                                      max_epochs_no_progress)
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
 
@@ -46,5 +49,5 @@ class RNNWrapper(BaseEstimator, ClassifierMixin):
         self.logger.info('Predict probabilities of x: %s', np.shape(x))
         with self.model.session.as_default():
             return self.model.prediction.eval(feed_dict={
-                self.model._x_t: x
+                self.model.x_t: x
             })

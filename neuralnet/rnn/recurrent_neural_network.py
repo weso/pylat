@@ -93,15 +93,15 @@ class RecurrentNeuralNetwork(BaseNeuralNetwork):
 
     @lazy_property
     def prediction(self):
-        self._x_t = tf.placeholder(tf.int64, shape=[None, self.num_steps],
+        self.x_t = tf.placeholder(tf.int64, shape=[None, self.num_steps],
                                    name='x_input')
-        self._y_t = tf.placeholder(tf.int64, shape=[None], name='y_input')
+        self.y_t = tf.placeholder(tf.int64, shape=[None], name='y_input')
 
         with tf.name_scope('embeddings'):
             np_emb = np.array(self.w2v_embeddings)
             embeddings = tf.get_variable(name="W", shape=np_emb.shape, trainable=False,
                                          initializer=tf.constant_initializer(np_emb))
-            rnn_inputs = tf.nn.embedding_lookup(embeddings, self._x_t)
+            rnn_inputs = tf.nn.embedding_lookup(embeddings, self.x_t)
 
         with tf.name_scope('dnn'):
             logits = self._rnn(rnn_inputs, self.num_classes)
@@ -111,23 +111,26 @@ class RecurrentNeuralNetwork(BaseNeuralNetwork):
         return softmax
 
     @lazy_property
-    def optimize(self):
+    def loss(self):
         with tf.name_scope('loss'):
-            xent = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self._y_t,
+            xent = tf.nn.sparse_softmax_cross_entropy_with_logits(labels=self.y_t,
                                                                   logits=self._logits,
                                                                   name='cross_entropy')
             loss_op = tf.reduce_mean(xent, name='loss')
+        return loss_op
 
+    @lazy_property
+    def optimize(self):
         with tf.name_scope('train'):
             optimizer = self.optimizer(learning_rate=self.learning_rate)
-            train_op = optimizer.minimize(loss_op)
+            train_op = optimizer.minimize(self.loss)
         return train_op
 
     @lazy_property
     def error(self):
         with tf.name_scope('accuracy'):
             y_pred = tf.argmax(self.prediction, axis=1, name='output')
-            correct = tf.equal(y_pred, self._y_t)
+            correct = tf.equal(y_pred, self.y_t)
             accuracy = tf.reduce_mean(tf.cast(correct, dtype=tf.float32))
         return accuracy
 
@@ -168,16 +171,14 @@ class RecurrentNeuralNetwork(BaseNeuralNetwork):
         return output
 
     def __repr__(self):
-        return "rnn_bs{}_nc{}_ce{}_ln{}_dr{}_lr{}_op{}".format(
-            self.batch_size, self.num_units,
-            self.cell_factory.__class__.__name__,
+        return "rnn_nc{}_ce{}_ln{}_dr{}_lr{}_op{}".format(
+            self.num_units, self.cell_factory.__class__.__name__,
             self.layer_norm, self.dropout_rate, self.learning_rate,
             self.optimizer.__name__)
 
     def __str__(self):
-        return "RNN. batch_size: {} - num_cells: {} - cell: {} \
+        return "RNN. num_cells: {} - cell: {} \
             - norm: {} - dropout: {} - l_rate: {} - optimizer: {}".format(
-            self.batch_size, self.num_units,
-            self.cell_factory.__class__.__name__,
+            self.num_units, self.cell_factory.__class__.__name__,
             self.layer_norm, self.dropout_rate, self.learning_rate,
             self.optimizer.__name__)
