@@ -149,7 +149,8 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
             tokens = [tok for tok in tokens if not tok.is_stop and not tok.is_punct]
 
         if self.lemmatize:
-            tokens = [tok.lemma_.lower().strip() for tok in tokens]
+            tokens = [tok.lemma_.lower().strip() if tok.lemma_ != '-PRON-'
+                      else tok.text.lower().strip() for tok in tokens]
         else:
             tokens = [tok.text.lower().strip() for tok in tokens]
         return tokens

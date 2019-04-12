@@ -18,7 +18,7 @@ class BaseNeuralNetwork(ABC):
         self.init = None
 
     def init_model(self, X, y):
-        self.session = tf.Session()
+        self.session = tf.Session(config=tf.ConfigProto(log_device_placement=True))
         self.prediction
         self.optimize
         self.error
@@ -41,22 +41,22 @@ class BaseNeuralNetwork(ABC):
         self.x_t = graph.get_tensor_by_name('x_input:0')
         self.y_proba = graph.get_tensor_by_name('dnn/y_proba:0')
 
-    @lazy_property
+    @property
     @abstractmethod
     def prediction(self):
         pass
 
-    @lazy_property
+    @property
     @abstractmethod
     def loss(self):
         pass
 
-    @lazy_property
+    @property
     @abstractmethod
     def optimize(self):
         pass
 
-    @lazy_property
+    @property
     @abstractmethod
     def error(self):
         pass

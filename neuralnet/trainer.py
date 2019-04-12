@@ -8,6 +8,18 @@ from .utils import get_next_batch
 
 
 class BaseTrainer(ABC):
+    """
+
+    Parameters
+    ----------
+    num_epochs: int (default=200)
+        Maximum number of epochs taken during the training phase.
+
+    batch_size: int (default=30)
+        Number of training instances used for each gradient update
+        in the training phase.
+    """
+
     def __init__(self, model, num_epochs=200, batch_size=30):
         self.model = model
         self.batch_size = batch_size
@@ -25,13 +37,14 @@ class BaseTrainer(ABC):
 
         self.logger.info('Starting training...')
         self._train_loop(X, y)
-        self.model.on_train_finished()
 
     def _train_loop(self, X, y):
         self.on_train_loop_started(X, y)
-        num_batches = len(self.X_train) // self.batch_size
+        num_batches = len(self.X_train) // self.batch_size + 1
         for epoch in range(self.num_epochs):
-            self._epoch_loop(epoch, num_batches)
+            stop_train = self._epoch_loop(epoch, num_batches)
+            if stop_train:
+                break
         self.saver.restore(self.model.session, self.model.save_path)
 
     def _epoch_loop(self, num_epoch, num_batches):
@@ -43,26 +56,27 @@ class BaseTrainer(ABC):
                                               batch_idx, self.batch_size)
             feed_dict = {
                 self.model.x_t: x_batch,
-                self.model.y_t: y_batch
+                self.model.y_t: y_batch,
+                self.model.is_training: True
             }
             _, batch_loss, batch_accuracy = self.model.session.run(
                 [self.model.optimize, self.model.loss, self.model.error],
                 feed_dict=feed_dict)
+            print(batch_loss, batch_accuracy)
             train_accuracy += batch_accuracy
             train_loss += batch_loss
         train_accuracy /= num_batches
         train_loss /= num_batches
-        self.on_epoch_finished(train_loss, train_accuracy)
+        return self.on_epoch_finished(train_loss, train_accuracy)
 
-    @abstractmethod
     def on_train_loop_started(self, X, y):
         self.X_train = X
         self.y_train = y
 
-    @abstractmethod
     def on_epoch_finished(self, loss, acc):
         self.logger.info('Train: Loss = {:.3f} - Accuracy = {:.3f}'.format(
             loss, acc * 100))
+        return False
 
 
 class EarlyStoppingTrainer(BaseTrainer):
@@ -105,9 +119,9 @@ class EarlyStoppingTrainer(BaseTrainer):
                 self.logger.info('No progress after %s epochs. '
                                  'Stopping...',
                                  self.max_epochs_without_progress)
-                return
+                return True
         self.logger.info('Validation: Loss = {:.5f} - Best loss = '
                          '{:.5f} - Accuracy = {:.3f}'.format(val_loss,
                                                              self.best_loss,
                                                              val_acc * 100))
-        super().on_epoch_finished(loss, acc)
+        return super().on_epoch_finished(loss, acc)

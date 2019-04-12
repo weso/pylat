@@ -8,38 +8,34 @@ class BaseCellFactory(ABC):
     """Abstract base class for all cell factories."""
 
     @abstractmethod
-    def __call__(self, num_units, activation, kernel_init, dropout_rate, layer_norm):
+    def __call__(self, num_units, activation, kernel_init, dropout, layer_norm):
         pass
 
 
 class LSTMCellFactory(BaseCellFactory):
     """Factory that creates variations of the LSTM cell."""
 
-    def __call__(self, num_units, activation, kernel_init, use_dropout, keep_prob, layer_norm):
+    def __call__(self, num_units, activation, kernel_init, dropout, layer_norm):
         if layer_norm:
-            return tf.contrib.rnn.LayerNormBasicLSTMCell(num_units, layer_norm=True,
-                                                         dropout_keep_prob=1-dropout_rate)
+            return tf.contrib.rnn.LayerNormBasicLSTMCell(num_units,
+                                                         layer_norm=True)
         else:
-            lstm_cell = tf.contrib.rnn.LSTMCell(num_units, initializer=kernel_init)
-            if use_dropout:
-                return tf.contrib.rnn.DropoutWrapper(lstm_cell, output_keep_prob=keep_prob)
-            else:
-                return lstm_cell
+            return tf.keras.layers.LSTMCell(num_units, dropout=dropout)
 
 
 class GRUCellFactory(BaseCellFactory):
     """Factory that creates variations of the GRU cell."""
 
-    def __call__(self, num_units, activation, kernel_init, use_dropout, keep_prob, layer_norm):
-        gru_cell = tf.contrib.rnn.GRUCell(num_units, activation)
-        if use_dropout:
-            return tf.contrib.rnn.DropoutWrapper(gru_cell, output_keep_prob=keep_prob)
-        else:
-            return gru_cell
+    def __call__(self, num_units, activation, kernel_init, dropout, layer_norm):
+        return tf.keras.layers.GRUCell(num_units, activation,
+                                       kernel_initializer=kernel_init,
+                                       dropout=dropout)
 
 
 class SimpleCellFactory(BaseCellFactory):
     """Factory that creates variations of a basic rnn cell."""
 
-    def __call__(self, num_units, activation, kernel_init, use_dropout, keep_prob, layer_norm):
-        return tf.nn.rnn_cell.BasicRNNCell(num_units)
+    def __call__(self, num_units, activation, kernel_init, dropout, layer_norm):
+        return tf.keras.layers.SimpleRNNCell(num_units, activation,
+                                             kernel_initializer=kernel_init,
+                                             dropout=dropout)

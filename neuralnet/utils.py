@@ -13,9 +13,10 @@ def get_next_batch(x, y, batch_idx, batch_size):
     :param batch_size: Size of the batch
     :return: Tuple containing the current x and y batch.
     """
-
     start = batch_idx * batch_size
     end = (batch_idx + 1) * batch_size
+    end = min(end, len(x) + 1)
+    print(start, end)
     return x[start:end], y[start:end]
 
 
