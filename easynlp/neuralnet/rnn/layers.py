@@ -1,7 +1,7 @@
 import tensorflow as tf
 
-from src.neuralnet.layers import BaseLayer
-from src.neuralnet.rnn.cells import GRUCellFactory
+from ..layers import BaseLayer
+from .cells import GRUCellFactory
 
 
 class RecurrentLayer(BaseLayer):

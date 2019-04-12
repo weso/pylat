@@ -5,8 +5,8 @@ import tensorflow as tf
 from sklearn.base import BaseEstimator, ClassifierMixin
 from sklearn.exceptions import NotFittedError
 
-from src.neuralnet.rnn.recurrent_neural_network import RecurrentNeuralNetwork
-from src.neuralnet.trainer import BaseTrainer, EarlyStoppingTrainer
+from easynlp.neuralnet.rnn.recurrent_neural_network import RecurrentNeuralNetwork
+from easynlp.neuralnet.trainer import BaseTrainer, EarlyStoppingTrainer
 
 
 class RNNWrapper(BaseEstimator, ClassifierMixin):

@@ -44,10 +44,10 @@ class Doc2VecTransformer(BaseEstimator, TransformerMixin):
 
     Examples
     --------
-    >>> from src.transformers.doc2vec_transformer import Doc2VecTransformer
+    >>> from easynlp.wrapper.transformer.doc2vec_transformer import Doc2VecTransformer
     >>> from gensim.models.doc2vec import TaggedDocument, Doc2Vec
     >>> X = [['Sample', 'text'], ['another', 'one'], ['last', 'one']]
-    >>> tagged_data =
+    >>> tagged_data = [TaggedDocument(words=sent, tags=[idx]) for idx, sent in enumerate(X)]
     >>> # arguments passed to transformer in order to make execution deterministic
     >>> d2v = Doc2VecTransformer(fit_corpus=tagged_data, size=2, epochs=5, workers=1, random_seed=42, min_count=1, window=1, hashfxn=len)
     >>> d2v.fit(X).transform(X)

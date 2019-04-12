@@ -1,6 +1,6 @@
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.exceptions import NotFittedError
-from src.exceptions import InvalidArgumentError
+from easynlp.exceptions import InvalidArgumentError
 
 import numpy as np
 import spacy
@@ -56,17 +56,17 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
 
     Examples
     --------
-    >>> from src.text_preprocessor import TextPreprocessor
+    >>> from easynlp.wrapper.transformer.text_preprocessor import TextPreprocessor
     >>> X = ['Hi, how are you doing?']
     >>> base_preprocessor = TextPreprocessor()
     >>> print(base_preprocessor.fit_transform(X))
-    [['Hi' ',' 'how' 'are' 'you' 'doing' '?']]
+    [['hi' ',' 'how' 'are' 'you' 'doing' '?']]
     >>> lemmatizer = TextPreprocessor(lemmatize=True)
     >>> print(lemmatizer.fit_transform(X))
-    [['hi' ',' 'how' 'be' '-pron-' 'do' '?']]
+    [['hi' ',' 'how' 'be' 'you' 'do' '?']]
     >>> preprocessor = TextPreprocessor(remove_stop_words=True)
     >>> print(preprocessor.fit_transform(X))
-    [['Hi']]
+    [['hi']]
     """
 
     model_caches = {}

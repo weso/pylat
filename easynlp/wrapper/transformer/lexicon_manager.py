@@ -1,4 +1,4 @@
-from src.exceptions import InvalidArgumentError
+from easynlp.exceptions import InvalidArgumentError
 
 import csv
 
@@ -17,9 +17,10 @@ class LexiconManager():
 
     Examples
     --------
-    >>> from src.transformer.lexicon_manager import LexiconManager
+    >>> import os
+    >>> from easynlp.wrapper.transformer.lexicon_manager import LexiconManager
     >>> tokens = ['I', 'need', 'more', 'alcohol', 'now']
-    >>> lexicon_path = os.path.join('data', 'lexicon', 'lexicon.txt')
+    >>> lexicon_path = os.path.join('test', 'data', 'lexicon.txt')
     >>> lexicon = LexiconManager(lexicon_path)
     >>> lexicon.valence(tokens)
         0.45

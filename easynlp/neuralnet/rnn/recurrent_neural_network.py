@@ -1,6 +1,5 @@
-from src.exceptions import InvalidArgumentError
-from src.neuralnet.model import BaseNeuralNetwork
-from src.neuralnet.utils import lazy_property
+from easynlp.exceptions import InvalidArgumentError
+from ..model import BaseNeuralNetwork
 
 import numpy as np
 import tensorflow as tf
@@ -57,7 +56,7 @@ class RecurrentNeuralNetwork(BaseNeuralNetwork):
 
     Examples
     --------
-    >>> from src.neuralnet.rnn.recurrent_neural_network import \
+    >>> from easynlp.neuralnet.rnn.recurrent_neural_network import \
         RecurrentNeuralNetwork
     >>> X = ['Hi, how are you doing?']
     >>> X_prep = X

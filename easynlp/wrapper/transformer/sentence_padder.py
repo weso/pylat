@@ -1,7 +1,7 @@
 import numpy as np
 
 from sklearn.base import BaseEstimator, TransformerMixin
-from src.exceptions import InvalidArgumentError
+from easynlp.exceptions import InvalidArgumentError
 
 __author__ = 'Alejandro González Hevia'
 
@@ -23,7 +23,7 @@ class SentencePadder(BaseEstimator, TransformerMixin):
 
     Examples
     --------
-    >>> from src.sentence_padder import SentencePadder
+    >>> from easynlp.wrapper.transformer.sentence_padder import SentencePadder
     >>> X = [
     ...         [[1, 4, 5], [2, 3, 5], [5, 1, 3]],
     ...         [[1, 2, 3]],
