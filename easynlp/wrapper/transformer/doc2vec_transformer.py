@@ -18,25 +18,25 @@ class Doc2VecTransformer(BaseEstimator, TransformerMixin):
 
     Parameters
     ----------
-    fit_corpus: iterable list of TaggedDocument
+    fit_corpus : iterable list of TaggedDocument
         Sentences used to train the word embedding.
 
-    model: Doc2Vec model (default=None)
+    model : Doc2Vec model (default=None)
         Doc2Vec loaded model to use. If None, a new model will be trained
         with the rest of the params. If you pass a model, the training step
         will be skipped, so the rest of the params will not be used.
 
-    vector_size: int (default=100)
+    vector_size : int (default=100)
         Number of dimensions of the document vector representation will have.
 
-    window: int (default=5)
+    window : int (default=5)
         Number of neighbouring words used to learn the vector representations.
 
-    min_count: int (defalt=5)
+    min_count : int (default=5)
         Minimum number of occurrences of a word in the training data in
         order to be added to the learned vocabulary.
 
-    max_vocab_size: int (default=None)
+    max_vocab_size : int (default=None)
         Maximum size of the vocabulary learned. Most infrequent words will
         not be added to the vocab in order to fulfill this constraint. If None,
         all the words that have at least min_count occurrences will be added
