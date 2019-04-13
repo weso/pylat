@@ -1,4 +1,4 @@
-from src.exceptions import InvalidArgumentError
+from easynlp.exceptions import InvalidArgumentError
 
 import csv
 
@@ -17,16 +17,17 @@ class LexiconManager():
 
     Examples
     --------
-    >>> from src.transformer.lexicon_manager import LexiconManager
+    >>> import os
+    >>> from easynlp.wrapper.transformer.lexicon_manager import LexiconManager
     >>> tokens = ['I', 'need', 'more', 'alcohol', 'now']
-    >>> lexicon_path = os.path.join('data', 'lexicon', 'lexicon.txt')
+    >>> lexicon_path = os.path.join('test', 'data', 'test_lexicon.txt')
     >>> lexicon = LexiconManager(lexicon_path)
-    >>> lexicon.valence(tokens)
-        0.45
-    >>> lexicon.arousal(tokens)
-        0.12
-    >>> lexicon.dominance(tokens)
-        0.26
+    >>> round(lexicon.valence(tokens), 3)
+        0.178
+    >>> round(lexicon.arousal(tokens), 3)
+        0.188
+    >>> round(lexicon.dominance(tokens), 3)
+        0.304
     """
     def __init__(self, lexicon_path):
         self._lexicon = dict()
@@ -78,7 +79,7 @@ class LexiconManager():
         :param text: List of tokens which are present in the text.
         :return: float normalized number with the specified score
         """
-        if not hasattr(text, '__iter__'):
+        if not hasattr(text, '__iter__') or type(text) == str:
             raise InvalidArgumentError('text', 'Text must be an iterable of tokens')
         result = 0
         words_used = 0

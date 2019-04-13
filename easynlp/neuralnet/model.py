@@ -3,8 +3,6 @@ import tensorflow as tf
 
 from abc import ABC, abstractmethod
 from tensorflow.python.saved_model import tag_constants
-from src.neuralnet.utils import lazy_property
-
 
 class BaseNeuralNetwork(ABC):
 

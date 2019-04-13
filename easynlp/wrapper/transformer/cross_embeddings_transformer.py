@@ -1,4 +1,4 @@
-from src.exceptions import InvalidArgumentError
+from easynlp.exceptions import InvalidArgumentError
 
 from pymagnitude import Magnitude
 from sklearn.base import BaseEstimator, TransformerMixin

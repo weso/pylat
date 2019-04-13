@@ -1,4 +1,4 @@
-from src.exceptions import InvalidArgumentError
+from easynlp.exceptions import InvalidArgumentError
 from sklearn.base import BaseEstimator, TransformerMixin
 
 import pandas as pd
@@ -23,7 +23,7 @@ class DataFrameSelector(BaseEstimator, TransformerMixin):
     >>> import pandas as pd
     >>> from sklearn.feature_extraction.text import CountVectorizer
     >>> from sklearn.pipeline import Pipeline
-    >>> from src.dataframe_selector import DataFrameSelector
+    >>> from easynlp.wrapper.transformer.dataframe_selector import DataFrameSelector
     >>> df = pd.DataFrame(data={
     ...    'text': ['Sample text', 'another one', 'more text data', 'last one one'],
     ...    'labels': [0, 0, 1, 0],
