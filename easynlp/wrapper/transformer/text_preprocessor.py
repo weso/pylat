@@ -5,7 +5,6 @@ from easynlp.exceptions import InvalidArgumentError
 import en_core_web_sm, es_core_news_sm
 
 import numpy as np
-import spacy
 
 import copy
 import logging
