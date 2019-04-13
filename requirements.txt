@@ -25,7 +25,8 @@ decorator==4.3.2
 defusedxml==0.5.0
 dill==0.2.9
 docutils==0.14
-en-core-web-sm==2.0.0
+en-core-web-sm==2.1.0
+es_core_news_sm==2.1.0
 entrypoints==0.3
 fasteners==0.14.1
 future==0.17.1
@@ -114,8 +115,6 @@ smart-open==1.8.0
 snowballstemmer==1.2.1
 soupsieve==1.8
 spacy==2.0.18
-https://github.com/spacy-models/releases/download/en_core_web_sm-2.0.0/en_core_web_sm-2.0.0.tar.gz#egg=en_core_web_sm
-https://github.com/explosion/spacy-models/releases/download/es_core_news_sm-2.1.0/es_core_news_sm-2.1.0.tar.gz#egg=es_core_news_sm
 tensorboard==1.13.1
 tensorflow==1.13.1
 tensorflow-estimator==1.13.0
