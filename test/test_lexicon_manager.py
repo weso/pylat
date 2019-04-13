@@ -4,7 +4,7 @@ from easynlp.exceptions import InvalidArgumentError
 import os
 import pytest
 
-lexicon_path = os.path.join('data', 'lexicon', 'NRC-VAD-Lexicon.txt')
+lexicon_path = os.path.join('test', 'data', 'test_lexicon.txt')
 
 
 class TestLexiconManager():
@@ -13,9 +13,9 @@ class TestLexiconManager():
         """
         tokens = ["this", "first", "test", "is", "mine"]
         lexicon = LexiconManager(lexicon_path)
-        assert pytest.approx(lexicon.valence(tokens), 0.001) == 0.587
-        assert pytest.approx(lexicon.arousal(tokens), 0.001) == 0.473
-        assert pytest.approx(lexicon.dominance(tokens), 0.001) == 0.625
+        assert pytest.approx(lexicon.valence(tokens), 0.001) == 0.270
+        assert pytest.approx(lexicon.arousal(tokens), 0.001) == 0.220
+        assert pytest.approx(lexicon.dominance(tokens), 0.001) == 0.120
 
     def test_invalid_lexicon_path(self):
         """ Test passing an invalid lexicon path in the constructor.

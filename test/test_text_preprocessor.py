@@ -63,7 +63,7 @@ class TestTextPreprocessor(unittest.TestCase):
             invalid_add_pipe_type.fit(self.sample_en)
 
         invalid_model_id = TextPreprocessor(spacy_model_id='invented')
-        with pytest.raises(OSError):
+        with pytest.raises(InvalidArgumentError):
             invalid_model_id.fit(self.sample_en)
 
     def test_valid_params(self):

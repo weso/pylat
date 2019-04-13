@@ -2,6 +2,8 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.exceptions import NotFittedError
 from easynlp.exceptions import InvalidArgumentError
 
+import en_core_web_sm, es_core_news_sm
+
 import numpy as np
 import spacy
 
@@ -10,6 +12,11 @@ import logging
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
+
+id2pkg = {
+    'en': en_core_web_sm,
+    'es': es_core_news_sm
+}
 
 
 class TextPreprocessor(BaseEstimator, TransformerMixin):
@@ -97,7 +104,8 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
         if self.spacy_model_id not in self.model_caches:
             logger.info('Model {} was not found in cache'.format(self.spacy_model_id))
             logger.info('Loading model {}...'.format(self.spacy_model_id))
-            self.model_caches[self.spacy_model_id] = spacy.load(self.spacy_model_id, disable=self.disable)
+            pkg = id2pkg[self.spacy_model_id]
+            self.model_caches[self.spacy_model_id] = pkg.load(disable=self.disable)
 
         return self.model_caches[self.spacy_model_id]
 
@@ -184,6 +192,11 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
         if not hasattr(self.additional_pipes, '__iter__'):
             logger.info('Additional pipes is: {}'.format(self.additional_pipes))
             raise InvalidArgumentError('additional_pipes', 'Additional pipes must be an iterable of callables')
+
+        if self.spacy_model_id not in id2pkg.keys():
+            raise InvalidArgumentError('spacy_model_id',
+                                       'Model not found. List of valid model '
+                                       'ids: {}'.format(id2pkg.keys()))
 
         for pipe in self.additional_pipes:
             if not hasattr(pipe, '__call__'):
