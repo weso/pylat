@@ -29,7 +29,7 @@ class CrossEmbeddingsTransformer(BaseEstimator, TransformerMixin):
         """
         if transform_params.get('language') is None:
             logger.warning('Language parameter was not specified. Input '
-                           'sentences are asumed to be in English.')
+                           'sentences are assumed to be in English.')
             language = 'en'
         else:
             language = transform_params['language']
