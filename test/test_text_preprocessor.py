@@ -103,7 +103,7 @@ class TestTextPreprocessor(unittest.TestCase):
             'txt_prep__additional_pipes': [None, [pipe_sample]]
         }
 
-        grid_search = GridSearchCV(pipe, param_grid, n_jobs=-1)
+        grid_search = GridSearchCV(pipe, param_grid, n_jobs=-1, iid=False, cv=2)
         grid_search.fit(self.sample_en, self.labels_en)
 
     def test_transform_before_fit(self):

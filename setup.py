@@ -13,8 +13,8 @@ setup(
     description='A simple library with some common nlp operations',
     install_requires=[
         'gensim', 'scikit-learn', 'numpy', 'pandas',
-        'spacy', 'pymagnitude', 'tensorflow==1.13.1',
-        'xmltodict', 'en_core_web_sm', 'es_core_news_sm'
+        'spacy', 'tensorflow==1.13.1', 'xmltodict',
+        'en_core_web_sm', 'es_core_news_sm'
     ],
     dependency_links=[
         'https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-2.1.0/en_core_web_sm-2.1.0.tar.gz#egg=en_core_web_sm-2.1.0',
