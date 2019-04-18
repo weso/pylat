@@ -14,41 +14,95 @@ logger.setLevel(logging.DEBUG)
 
 
 class BaseEmbedding(ABC):
+    """Base class of all the embeddings.
+
+    This class provides the two methods that all the embedding classes provide
+    to the user. It can be extended by other classes to add extra functionality.
+    """
+
     @abstractmethod
     def train(self, train_data):
+        """Train the embedding with the given training data.
+
+        Parameters
+        ----------
+        train_data
+
+        Returns
+        -------
+        self
+            Trained embedding instance.
+        """
         pass
 
     @abstractmethod
     def to_vector(self, text):
+        """Transforms text into its numerical representation
+
+        Parameters
+        ----------
+        text
+
+        Returns
+        -------
+        list of float
+            Vector representation of the input text.
+        """
         pass
 
 
-class GensimConfig():
-    """
+class GensimConfig:
+    """ Configuration class for embeddings from the gensim module.
 
-
+    This class stores the parameters needed to train embeddings from the
+    gensim module ('word2vec' and 'doc2vec'). It is used by the
+    Word2VecEmbedding and Doc2VecEmbedding classes in order to train their
+    respective models.
 
     Parameters
     ----------
-    vector_size : int (default=100)
-        Number of dimensions of the document vector representation will have.
+    epochs : int, optional (default=100)
+        Number of epochs used to learn the vector representations.
 
-    window : int (default=5)
-        Number of neighbouring words used to learn the vector representations.
+    size : int, optional (default=100)
+        Number of dimensions that the final vector representation will have.
 
-    min_count : int (default=5)
+    min_count : int, optional (default=5)
         Minimum number of occurrences of a word in the training data in
         order to be added to the learned vocabulary.
 
-    max_vocab_size : int (default=None)
+    max_vocab_size : int, optional (default=None)
         Maximum size of the vocabulary learned. Most infrequent words will
         not be added to the vocab in order to fulfill this constraint. If None,
         all the words that have at least min_count occurrences will be added
         to the vocabulary.
+
+    window : int, optional (default=5)
+        Number of neighbouring words used to learn the vector representations.
+
+    alpha : float, optional (default=0.025)
+        Initial learning rate of the model.
+
+    min_alpha : float, optional (default=0.0001)
+        Minimum learning rate that the model will reach during training.
+
+    sample : float, optional (default=0.01)
+        This value configures which words with higher frequency are downsampled.
+
+    seed : int, optional (default=42)
+        Random seed used internally by the model in the training phase.
+
+    workers : int, optional (default=3)
+        Number of threads used to train the model.
+
+    hashfxn : func, optional (default=hash)
+        Function used internally to perform hashing of the words. If you want
+        to obtain completely deterministic results, you can set this function
+        to `len`. Otherwise, it is recommended to leave the default value.
     """
-    def __init__(self, size=100, alpha=0.025, window=5, min_alpha=0.0001,
-                 min_count=5, max_vocab_size=None, sample=0.001,
-                 seed=42, workers=3, epochs=100, hashfxn=hash):
+    def __init__(self, epochs=100, size=100, min_count=5, max_vocab_size=None,
+                 window=5, alpha=0.025, min_alpha=0.0001, sample=0.001,
+                 seed=42, workers=3, hashfxn=hash):
         self.size = size
         self.alpha = alpha
         self.window = window
@@ -62,27 +116,48 @@ class GensimConfig():
         self.hashfxn = hashfxn
 
     def to_doc2vec(self):
+        """Transforms the configuration to the specific Doc2Vec class names.
+
+        Returns
+        -------
+        dict
+            Dictionary containing every parameter of the configuration used
+            by the Doc2Vec Gensim class.
+        """
         params_dict = vars(self)
+        # change the following two params to be the same as the Doc2Vec ones
         params_dict['vector_size'] = params_dict.pop('size')
         params_dict['epochs'] = params_dict.pop('iter')
         return params_dict
 
     def to_word2vec(self):
+        """Transforms the configuration to the specific Word2Vec class names.
+
+        Returns
+        -------
+        dict
+            Dictionary containing every parameter of the configuration used
+            by the Word2Vec Gensim class.
+        """
         return vars(self)
 
 
 class Doc2VecEmbedding(BaseEmbedding):
-    """
+    """Embedding class that transforms sentences into vectors.
+
+    This class is a wrapper around the Gensim Doc2Vec implementation that
+    implements the BaseEmbedding interface.
 
     Parameters
     ----------
-
+    gensim_conf : :obj:`GensimConfig` (default=GensimConfig())
+        An instance of the GensimConfig class providing the parameters that will
+        be used to train the embeddings.
 
     model : Doc2Vec model (default=None)
         Doc2Vec loaded model to use. If None, a new model will be trained
         with the given GensimConfig. If you pass a model, the training step
         will be skipped, so the Gensim configuration will not be used.
-
     """
 
     def __init__(self, gensim_conf=GensimConfig(), model=None):
@@ -105,38 +180,63 @@ class Doc2VecEmbedding(BaseEmbedding):
 
 
 class BaseWordEmbedding(BaseEmbedding, ABC):
+    """Base class of all the word embedding classes.
+
+    This class provides the basic interface of all the embeddings that work at
+    a word level.
+    """
+
     @abstractmethod
     def to_id(self, token):
+        """Return the id of the given token in the embedding.
+
+        Parameters
+        ----------
+        token : str
+            Token for which the id will be retrieved.
+
+        Returns
+        -------
+        int
+            ID of the token if it is present in the embedding, None otherwise.
+        """
         pass
 
     @abstractmethod
     def to_word(self, token_id):
+        """Returns the word corresponding to the given id in the embedding.
+
+        Parameters
+        ----------
+        token_id : int
+            ID of the token that will be retrieved.
+
+        Returns
+        -------
+        str
+            Token with the given id if it is present in the embedding,
+            None otherwise.
+        """
         pass
 
     @abstractmethod
     def get_vectors(self):
+        """Returns all the vectors computed by the embedding instance.
+
+        Returns
+        -------
+        2d array of float
+            Values of the numeric representations of every word.
+        """
         pass
 
 
 class Word2VecEmbedding(BaseWordEmbedding):
-
     def __init__(self, gensim_conf=GensimConfig(), model=None):
         self.conf = gensim_conf
         self.model = model
 
     def train(self, train_data):
-        """
-
-        Parameters
-        ----------
-
-        train_data : iterable list of tokens
-            Sentences used to train the word embedding.
-
-        Returns
-        -------
-
-        """
         if self.model is None:
             _assert_valid_train_data(train_data)
             _assert_valid_conf(self.conf)
@@ -223,6 +323,12 @@ class CrossLingualPretrainedEmbedding(BaseWordEmbedding):
                                        'directory.'.format(language))
 
     class LoadedEmbedding:
+        """Inner class that stores information about the preloaded embeddings.
+
+        Parameters
+        ----------
+
+        """
         def __init__(self, wv, index2word, word2index):
             self.wv = wv
             self.index2word = index2word

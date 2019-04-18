@@ -35,7 +35,7 @@ class WordEmbeddingsTransformer(BaseTransformer):
             WordEmbeddingsTransformer
     >>> from easynlp.neuralnet.embeddings import GensimConfig, Word2VecEmbedding
     >>> X = [['Sample', 'text'], ['another', 'one'], ['last', 'one']]
-    >>> # arguments passed to transformer in order to make execution deterministic
+    >>> # arguments passed in order to make execution deterministic
     >>> config = GensimConfig(size=2, epochs=5, workers=1, seed=42, \
                               min_count=1, window=1, hashfxn=len)
     >>> embedding = Word2VecEmbedding(config)
@@ -43,7 +43,8 @@ class WordEmbeddingsTransformer(BaseTransformer):
     >>> vec_transformer.fit(X).transform(X)
         array([[[ 0.18671471,  0.23427033], [ 0.19643007, -0.08401009]],
                [[-0.24481292,  0.0009373 ], [-0.13900341,  0.18536615]],
-               [[ 0.19643007, -0.08401009], [-0.13900341,  0.18536615]]], dtype=float32)
+               [[ 0.19643007, -0.08401009], [-0.13900341,  0.18536615]]],
+               dtype=float32)
     >>> id_transformer = WordEmbeddingsTransformer(embedding)
     >>> id_transformer.fit(X).transform(X)
         array([[1, 2],
@@ -132,7 +133,7 @@ class DocumentEmbeddingsTransformer(BaseTransformer):
             DocumentEmbeddingsTransformer
     >>> from easynlp.neuralnet.embeddings import GensimConfig, Doc2VecEmbedding
     >>> X = [['Sample', 'text'], ['another', 'one'], ['last', 'one']]
-    >>> # arguments passed to transformer in order to make execution deterministic
+    >>> # arguments passed in order to make execution deterministic
     >>> config = GensimConfig(size=2, epochs=5, workers=1, seed=42, \
                               min_count=1, window=1, hashfxn=len)
     >>> embedding = Doc2VecEmbedding(config)
