@@ -1,7 +1,9 @@
+from sklearn.base import BaseEstimator, TransformerMixin
+
 import abc
 
 
-class BaseTransformer(abc.ABC):
+class BaseTransformer(abc.ABC, BaseEstimator, TransformerMixin):
     @abc.abstractmethod
     def fit(self, x, y=None):
         pass
@@ -10,11 +12,8 @@ class BaseTransformer(abc.ABC):
     def transform(self, x):
         pass
 
-    def fit_transform(self, x, y=None):
-        return self.fit(x, y).transform(x)
 
-
-class BasePredictor(abc.ABC):
+class BasePredictor(abc.ABC, BaseEstimator):
     @abc.abstractmethod
     def predict(self, x, y):
         pass
