@@ -286,7 +286,7 @@ class CrossLingualPretrainedEmbedding(BaseWordEmbedding):
 
     def get_vectors(self, **params):
         embeddings = self._get_embeddings_from(**params)
-        return embeddings.get_vectors_mmap()
+        return embeddings.wv
 
     def _load_vector(self, language):
         vector_path = os.path.join(self.embeddings_dir, language)

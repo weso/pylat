@@ -1,4 +1,9 @@
+from gensim.models import KeyedVectors
+from .embeddings import Word2VecEmbedding
+from pathlib import Path
+
 import functools
+import os
 import tensorflow as tf
 
 he_init = tf.contrib.layers.variance_scaling_initializer()
@@ -60,3 +65,22 @@ def lazy_property(func):
         return getattr(self, attribute)
 
     return decorator
+
+
+def convert_vec_embedding(input_file, output_dir):
+    """Converts a .vec file into the format used by the Embedding classes.
+
+    Parameters
+    ----------
+    input_file
+    output_dir
+
+    Returns
+    -------
+
+    """
+    path = Path(input_file)
+    file_name = path.stem
+    model = KeyedVectors.load_word2vec_format(input_file, unicode_errors='ignore')
+    embedding = Word2VecEmbedding(model=model)
+    embedding.save_embeddings(os.path.join(output_dir, file_name))
