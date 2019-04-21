@@ -244,7 +244,10 @@ class Word2VecEmbedding(BaseWordEmbedding):
                                   **self.conf.to_word2vec())
 
     def to_vector(self, token):
-        return self.model.wv[token]
+        try:
+            return self.model.wv[token]
+        except KeyError:
+            return None
 
     def to_id(self, token):
         try:
@@ -270,16 +273,22 @@ class CrossLingualPretrainedEmbedding(BaseWordEmbedding):
         self.embeddings_dir = embeddings_dir
         self.embeddings_dict = {}
 
-    def train(self, train_data):
+    def train(self, train_data, **params):
         pass
 
     def to_vector(self, token, **params):
         embeddings = self._get_embeddings_from(**params)
-        index = embeddings.word2index[token]
-        return embeddings.wv[index]
+        try:
+            index = embeddings.word2index[token]
+            return embeddings.wv[index]
+        except KeyError:
+            return None
 
     def to_id(self, token, **params):
-        return self._get_embeddings_from(**params).word2index[token]
+        try:
+            return self._get_embeddings_from(**params).word2index[token]
+        except KeyError:
+            return None
 
     def to_word(self, token_id, **params):
         return self._get_embeddings_from(**params).index2word[token_id]

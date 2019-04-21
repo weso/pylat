@@ -37,6 +37,7 @@ class BaseTrainer(ABC):
 
         self.logger.info('Starting training...')
         self._train_loop(X, y)
+        self.on_train_finished()
 
     def _train_loop(self, X, y):
         self.on_train_loop_started(X, y)
@@ -45,7 +46,6 @@ class BaseTrainer(ABC):
             stop_train = self._epoch_loop(epoch, num_batches)
             if stop_train:
                 break
-        self.saver.restore(self.model.session, self.model.save_path)
 
     def _epoch_loop(self, num_epoch, num_batches):
         self.logger.info('Epoch: {}'.format(num_epoch))
@@ -62,7 +62,6 @@ class BaseTrainer(ABC):
             _, batch_loss, batch_accuracy = self.model.session.run(
                 [self.model.optimize, self.model.loss, self.model.error],
                 feed_dict=feed_dict)
-            print(batch_loss, batch_accuracy)
             train_accuracy += batch_accuracy
             train_loss += batch_loss
         train_accuracy /= num_batches
@@ -77,6 +76,9 @@ class BaseTrainer(ABC):
         self.logger.info('Train: Loss = {:.3f} - Accuracy = {:.3f}'.format(
             loss, acc * 100))
         return False
+
+    def on_train_finished(self):
+        pass
 
 
 class EarlyStoppingTrainer(BaseTrainer):
@@ -125,3 +127,6 @@ class EarlyStoppingTrainer(BaseTrainer):
                                                              self.best_loss,
                                                              val_acc * 100))
         return super().on_epoch_finished(loss, acc)
+
+    def on_train_finished(self):
+        self.saver.restore(self.model.session, self.model.save_path)

@@ -74,32 +74,24 @@ class RecurrentNeuralNetwork(BaseNeuralNetwork):
         self.logger.setLevel(logging.INFO)
         self.random_seed = random_seed
         self.w2v_embeddings = embeddings
-        self.num_classes = 0
-        self.num_steps = 0
         self.softmax = None
         self.loss_op = None
         self.train_op = None
         self.accuracy = None
+        self._num_classes = 0
+        self._num_steps = 0
 
     def init_model(self, X, y):
-        self.num_classes = len(np.unique(y))
-        self.num_steps = len(max(X, key=len))
-        self.logger.info('Building graph. Num steps: %s', self.num_steps)
+        self._check_input(X, y)
+        self.logger.info('Building graph. Num steps: %s', self._num_steps)
         tf.set_random_seed(self.random_seed)
         super().init_model(X, y)
 
     @property
     def prediction(self):
         if self.softmax is None:
-            self.x_t = tf.placeholder(tf.int64, shape=[None, self.num_steps],
-                                       name='x_input')
-            self.y_t = tf.placeholder(tf.int64, shape=[None], name='y_input')
-
-            with tf.name_scope('embeddings'):
-                np_emb = np.array(self.w2v_embeddings)
-                embeddings = tf.get_variable(name="W", shape=np_emb.shape, trainable=False,
-                                             initializer=tf.constant_initializer(np_emb))
-                rnn_inputs = tf.nn.embedding_lookup(embeddings, self.x_t)
+            with tf.name_scope('input'):
+                rnn_inputs = self._input()
 
             with tf.name_scope('dnn'):
                 logits = self._rnn(rnn_inputs)
@@ -135,12 +127,9 @@ class RecurrentNeuralNetwork(BaseNeuralNetwork):
                 self.accuracy = tf.reduce_mean(tf.cast(correct, dtype=tf.float32))
         return self.accuracy
 
-    def _assert_valid_params(self):
-        if not isinstance(self.num_units, (list, tuple)):
-            raise InvalidArgumentError('num_units',
-                                       'Parameter num_units must be a list or tuple with the number of units per layer')
-        elif len(self.num_units) == 0:
-            raise InvalidArgumentError('num_units', 'Length of num units must be greater than zero')
+    def _check_input(self, X, y):
+        self._num_classes = len(np.unique(y))
+        self._num_steps = len(max(X, key=len))
 
     def _rnn(self, inputs):
         current_input = inputs
@@ -153,5 +142,28 @@ class RecurrentNeuralNetwork(BaseNeuralNetwork):
         with tf.name_scope('fc_layers'):
             for layer in self.fc_layers:
                 current_input = layer.build_tensor(current_input, **kwargs)
-            output = tf.keras.layers.Dense(self.num_classes)(current_input)
+            output = tf.keras.layers.Dense(self._num_classes)(current_input)
         return output
+
+    def _input(self):
+        self.x_t = tf.placeholder(tf.int64, shape=[None, self._num_steps],
+                                  name='x_input')
+        self.y_t = tf.placeholder(tf.int64, shape=[None], name='y_input')
+        with tf.name_scope('embeddings'):
+            self._np_emb = np.array(self.w2v_embeddings.get_vectors())
+            vocab_size, emb_dim = np.shape(self._np_emb)
+            embeddings = tf.Variable(
+                tf.constant(0.0, shape=[vocab_size, emb_dim]),
+                trainable=False, name="W")
+            self._embedding_placeholder = tf.placeholder(tf.float32,
+                                                         [vocab_size, emb_dim])
+            self._embedding_init = embeddings.assign(self._embedding_placeholder)
+            rnn_inputs = tf.nn.embedding_lookup(embeddings, self.x_t)
+        return rnn_inputs
+
+    def additional_inits(self):
+        self.session.run(self._embedding_init, feed_dict={
+            self._embedding_placeholder: self._np_emb
+        })
+        self._np_emb = None
+        del self._np_emb

@@ -8,7 +8,6 @@ from sklearn.exceptions import NotFittedError
 from easynlp.neuralnet.rnn.recurrent_neural_network import RecurrentNeuralNetwork
 from easynlp.neuralnet.trainer import BaseTrainer, EarlyStoppingTrainer
 
-
 class RNNWrapper(BaseEstimator, ClassifierMixin):
 
     def __init__(self, rnn_layers, fc_layers, num_epochs=30,

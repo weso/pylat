@@ -21,7 +21,6 @@ def get_next_batch(x, y, batch_idx, batch_size):
     start = batch_idx * batch_size
     end = (batch_idx + 1) * batch_size
     end = min(end, len(x) + 1)
-    print(start, end)
     return x[start:end], y[start:end]
 
 

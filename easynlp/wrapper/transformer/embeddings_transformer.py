@@ -1,9 +1,10 @@
 from easynlp.wrapper.transformer.base import BaseTransformer
+from sklearn.base import TransformerMixin
 
 import numpy as np
 
 
-class WordEmbeddingsTransformer(BaseTransformer):
+class WordEmbeddingsTransformer(BaseTransformer, TransformerMixin):
     """Transform a list of tokens to numbers using a word embedding.
 
     This is a wrapper around word2vec, complying to the scikit-learn
@@ -85,7 +86,7 @@ class WordEmbeddingsTransformer(BaseTransformer):
         self.embeddings.train(train_data, **fit_params)
         return self
 
-    def transform(self, x, **kwargs):
+    def transform(self, x, **transf_params):
         """Transforms the input text into numbers.
 
         This method uses the embeddings trained in the fit method to
@@ -103,8 +104,12 @@ class WordEmbeddingsTransformer(BaseTransformer):
         """
         func = self.embeddings.to_id if self._to_id \
             else self.embeddings.to_vector
-        return np.asarray([[func(token, **kwargs) for token in sentence]
+        return np.asarray([[func(token, **transf_params) for token in sentence
+                           if func(token, **transf_params) is not None]
                            for sentence in x])
+
+    def fit_transform(self, X, y=None, **params):
+        return self.fit(X, **params).transform(X, **params)
 
 
 class DocumentEmbeddingsTransformer(BaseTransformer):

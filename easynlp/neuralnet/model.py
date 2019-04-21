@@ -4,8 +4,8 @@ import tensorflow as tf
 from abc import ABC, abstractmethod
 from tensorflow.python.saved_model import tag_constants
 
-class BaseNeuralNetwork(ABC):
 
+class BaseNeuralNetwork(ABC):
     def __init__(self, save_dir='results'):
         self.save_dir = save_dir
         self.save_path = os.path.join(self.save_dir, 'best.ckpt')
@@ -22,6 +22,7 @@ class BaseNeuralNetwork(ABC):
         self.error
         self.init = tf.global_variables_initializer()
         self.session.run(self.init)
+        self.additional_inits()
 
     def save(self, save_path):
         inputs = {"x_t": self.x_t}
@@ -38,6 +39,9 @@ class BaseNeuralNetwork(ABC):
         )
         self.x_t = graph.get_tensor_by_name('x_input:0')
         self.y_proba = graph.get_tensor_by_name('dnn/y_proba:0')
+
+    def additional_inits(self):
+        pass
 
     @property
     @abstractmethod

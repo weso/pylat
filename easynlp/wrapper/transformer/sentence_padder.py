@@ -55,9 +55,9 @@ class SentencePadder(BaseEstimator, TransformerMixin):
 
     def transform(self, x):
         num_instances = len(x)
-        embedding_size = len(x[0][0])
-        ret = np.zeros(shape=[num_instances, self.padding_length, embedding_size], dtype=np.float32)
+        ret = np.zeros(shape=[num_instances, self.padding_length],
+                       dtype=np.float32)
         for idx, sentence in enumerate(x):
             if len(sentence) != 0:
-                ret[idx, :len(sentence), :] = sentence
+                ret[idx, :len(sentence)] = sentence
         return ret
