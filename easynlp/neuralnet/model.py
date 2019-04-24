@@ -2,7 +2,6 @@ import os
 import tensorflow as tf
 
 from abc import ABC, abstractmethod
-from tensorflow.python.saved_model import tag_constants
 
 
 class BaseNeuralNetwork(ABC):
@@ -24,21 +23,13 @@ class BaseNeuralNetwork(ABC):
         self.session.run(self.init)
         self.additional_inits()
 
+    @abstractmethod
     def save(self, save_path):
-        inputs = {"x_t": self.x_t}
-        outputs = {"pred_proba": self.prediction}
-        tf.saved_model.simple_save(self.session, save_path, inputs, outputs)
+        pass
 
+    @abstractmethod
     def restore(self, save_path):
-        graph = tf.Graph()
-        self.session = tf.Session(graph=graph)
-        tf.saved_model.loader.load(
-            self.session,
-            [tag_constants.SERVING],
-            save_path,
-        )
-        self.x_t = graph.get_tensor_by_name('x_input:0')
-        self.y_proba = graph.get_tensor_by_name('dnn/y_proba:0')
+        pass
 
     def additional_inits(self):
         pass

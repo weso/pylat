@@ -1,5 +1,5 @@
-from easynlp.exceptions import InvalidArgumentError
 from ..model import BaseNeuralNetwork
+from tensorflow.python.saved_model import tag_constants
 
 import numpy as np
 import tensorflow as tf
@@ -167,3 +167,19 @@ class RecurrentNeuralNetwork(BaseNeuralNetwork):
         })
         self._np_emb = None
         del self._np_emb
+
+    def save(self, save_path):
+        inputs = {"x_t": self.x_t}
+        outputs = {"pred_proba": self.prediction}
+        tf.saved_model.simple_save(self.session, save_path, inputs, outputs)
+
+    def restore(self, save_path):
+        graph = tf.Graph()
+        self.session = tf.Session(graph=graph)
+        tf.saved_model.loader.load(
+            self.session,
+            [tag_constants.SERVING],
+            save_path,
+        )
+        self.x_t = graph.get_tensor_by_name('input/x_input:0')
+        self.softmax = graph.get_tensor_by_name('dnn/y_proba:0')
