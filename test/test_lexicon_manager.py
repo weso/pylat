@@ -1,5 +1,5 @@
-from easynlp.wrapper.transformer.lexicon_manager import LexiconManager
-from easynlp.exceptions import InvalidArgumentError
+from pylat.wrapper.transformer.lexicon_manager import LexiconManager
+from pylat.exceptions import InvalidArgumentError
 
 import os
 import pytest

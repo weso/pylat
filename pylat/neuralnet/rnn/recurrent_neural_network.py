@@ -56,7 +56,7 @@ class RecurrentNeuralNetwork(BaseNeuralNetwork):
 
     Examples
     --------
-    >>> from easynlp.neuralnet.rnn.recurrent_neural_network import \
+    >>> from pylat.neuralnet.rnn.recurrent_neural_network import \
         RecurrentNeuralNetwork
     >>> X = ['Hi, how are you doing?']
     >>> X_prep = X

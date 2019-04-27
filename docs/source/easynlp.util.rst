@@ -1,13 +1,13 @@
-easynlp.util package
+pylat.util package
 ====================
 
 Submodules
 ----------
 
-easynlp.util.translate module
+pylat.util.translate module
 -----------------------------
 
-.. automodule:: easynlp.util.translate
+.. automodule:: pylat.util.translate
     :members:
     :undoc-members:
     :show-inheritance:
@@ -16,7 +16,7 @@ easynlp.util.translate module
 Module contents
 ---------------
 
-.. automodule:: easynlp.util
+.. automodule:: pylat.util
     :members:
     :undoc-members:
     :show-inheritance:

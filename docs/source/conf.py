@@ -17,7 +17,7 @@ sys.path.insert(0, os.path.abspath('../..'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'EasyNLP'
+project = 'pylat'
 copyright = '2019, Alejandro González Hevia'
 author = 'Alejandro González Hevia'
 

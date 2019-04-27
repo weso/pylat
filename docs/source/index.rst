@@ -1,9 +1,9 @@
-.. EasyNLP documentation master file, created by
+.. pylat documentation master file, created by
    sphinx-quickstart on Sat Apr 13 13:25:49 2019.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to EasyNLP's documentation!
+Welcome to pylat's documentation!
 ===================================
 
 .. toctree::

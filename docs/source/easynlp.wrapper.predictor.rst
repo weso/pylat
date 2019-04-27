@@ -7,7 +7,7 @@ Submodules
 RNNWrapper module
 ~~~~~~~~~~~~~~~~~
 
-.. automodule:: easynlp.wrapper.predictor.RNNWrapper
+.. automodule:: pylat.wrapper.predictor.RNNWrapper
     :members:
     :undoc-members:
     :show-inheritance:
@@ -16,7 +16,7 @@ RNNWrapper module
 Module contents
 ---------------
 
-.. automodule:: easynlp.wrapper.predictor
+.. automodule:: pylat.wrapper.predictor
     :members:
     :undoc-members:
     :show-inheritance:

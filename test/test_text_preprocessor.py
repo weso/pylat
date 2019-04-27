@@ -4,8 +4,8 @@ from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import GridSearchCV
 
-from easynlp.wrapper.transformer.text_preprocessor import TextPreprocessor
-from easynlp.exceptions import InvalidArgumentError
+from pylat.wrapper.transformer.text_preprocessor import TextPreprocessor
+from pylat.exceptions import InvalidArgumentError
 
 import logging
 import pytest

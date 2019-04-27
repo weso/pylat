@@ -6,14 +6,14 @@ Submodules
 
 data\_parser
 ~~~~~~~~~~~~
-.. automodule:: easynlp.data.data_parser
+.. automodule:: pylat.data.data_parser
     :members:
     :undoc-members:
     :show-inheritance:
 
 data\_sample
 ~~~~~~~~~~~~
-.. automodule:: easynlp.data.data_sample
+.. automodule:: pylat.data.data_sample
     :members:
     :undoc-members:
     :show-inheritance:
@@ -22,7 +22,7 @@ data\_sample
 Module contents
 ---------------
 
-.. automodule:: easynlp.data
+.. automodule:: pylat.data
     :members:
     :undoc-members:
     :show-inheritance:

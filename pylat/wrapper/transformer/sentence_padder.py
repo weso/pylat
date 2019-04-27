@@ -1,7 +1,7 @@
 import numpy as np
 
 from sklearn.base import BaseEstimator, TransformerMixin
-from easynlp.exceptions import InvalidArgumentError
+from pylat.exceptions import InvalidArgumentError
 
 __author__ = 'Alejandro González Hevia'
 
@@ -23,22 +23,22 @@ class SentencePadder(BaseEstimator, TransformerMixin):
 
     Examples
     --------
-    >>> from easynlp.wrapper.transformer.sentence_padder import SentencePadder
+    >>> from pylat.wrapper.transformer.sentence_padder import SentencePadder
     >>> X = [
-    ...         [[1, 4, 5], [2, 3, 5], [5, 1, 3]],
-    ...         [[1, 2, 3]],
-    ...         [[4, 5, 1], [2, 3, 1]]
+    ...         [1, 4, 5, 2, 3, 5, 5, 1, 3],
+    ...         [1, 2, 3],
+    ...         [4, 5, 1, 2, 3, 1]
     ...     ]
     >>> default_padder = SentencePadder()
     >>> default_padder.fit_transform(X)
-        array([[[1., 4., 5.], [2., 3., 5.], [5., 1., 3.]],
-               [[1., 2., 3.], [0., 0., 0.], [0., 0., 0.]],
-               [[4., 5., 1.], [2., 3., 1.], [0., 0., 0.]]], dtype=float32)
-    >>> custom_padder = SentencePadder(padding_length=5)
+        array([[1., 4., 5., 2., 3., 5., 5., 1., 3.],
+               [1., 2., 3., 0., 0., 0., 0., 0., 0.],
+               [4., 5., 1., 2., 3., 1., 0., 0., 0.]], dtype=float32)
+    >>> custom_padder = SentencePadder(padding_length=15)
     >>> custom_padder.fit_transform(X)
-        array([[[1., 4., 5.], [2., 3., 5.], [5., 1., 3.], [0., 0., 0.], [0., 0., 0.]],
-               [[1., 2., 3.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]],
-               [[4., 5., 1.], [2., 3., 1.], [0., 0., 0.], [0., 0., 0.], [0., 0., 0.]]], dtype=float32)
+        array([[1., 4., 5., 2., 3., 5., 5., 1., 3., 0., 0., 0., 0., 0., 0.],
+               [1., 2., 3., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0., 0.],
+               [4., 5., 1., 2., 3., 1., 0., 0., 0., 0., 0., 0., 0., 0., 0.]], dtype=float32)
     """
 
     def __init__(self, padding_length=None):

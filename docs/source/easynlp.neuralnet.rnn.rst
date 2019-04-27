@@ -7,7 +7,7 @@ Submodules
 cells module
 ~~~~~~~~~~~~
 
-.. automodule:: easynlp.neuralnet.rnn.cells
+.. automodule:: pylat.neuralnet.rnn.cells
     :members:
     :undoc-members:
     :show-inheritance:
@@ -15,7 +15,7 @@ cells module
 layers module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: easynlp.neuralnet.rnn.layers
+.. automodule:: pylat.neuralnet.rnn.layers
     :members:
     :undoc-members:
     :show-inheritance:
@@ -23,7 +23,7 @@ layers module
 recurrent\_neural\_network module
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-.. automodule:: easynlp.neuralnet.rnn.recurrent_neural_network
+.. automodule:: pylat.neuralnet.rnn.recurrent_neural_network
     :members:
     :undoc-members:
     :show-inheritance:
@@ -32,7 +32,7 @@ recurrent\_neural\_network module
 Module contents
 ---------------
 
-.. automodule:: easynlp.neuralnet.rnn
+.. automodule:: pylat.neuralnet.rnn
     :members:
     :undoc-members:
     :show-inheritance:

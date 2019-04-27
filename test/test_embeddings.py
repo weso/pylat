@@ -1,6 +1,6 @@
-from easynlp.neuralnet.embeddings import GensimConfig, Word2VecEmbedding, \
+from pylat.neuralnet.embeddings import GensimConfig, Word2VecEmbedding, \
     Doc2VecEmbedding, CrossLingualPretrainedEmbedding
-from easynlp.exceptions import InvalidArgumentError
+from pylat.exceptions import InvalidArgumentError
 from gensim.models import Doc2Vec, Word2Vec
 
 import numpy as np
@@ -69,15 +69,13 @@ class TestEmbeddings(unittest.TestCase):
     def test_change_language_multilingual_embedding(self):
         model = CrossLingualPretrainedEmbedding(self.embeddings_dir)
         self.assertEqual(model.to_id('tierno', language='es'), 4)
-        with pytest.raises(KeyError):
-            model.to_id('amigo', language='en')
+        self.assertEqual(model.to_id('tierno', language='en'), None)
         np.testing.assert_allclose(model.to_vector('cute', language='en'),
                                    np.asarray([0.3, 0.8, 0.6]))
 
     def test_no_language_set_multilingual_embedding(self):
         model = CrossLingualPretrainedEmbedding(self.embeddings_dir)
-        with pytest.raises(KeyError):
-            model.to_id('amigo')
+        self.assertEqual(model.to_id('amigo'), None)
         self.assertEqual(model.to_id('friend'), 2)
 
     def test_invalid_language_multilingual_embedding(self):

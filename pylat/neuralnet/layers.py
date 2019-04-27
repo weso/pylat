@@ -1,7 +1,7 @@
 import tensorflow as tf
 
 from abc import ABC, abstractmethod
-from easynlp.exceptions import InvalidArgumentError
+from pylat.exceptions import InvalidArgumentError
 
 
 class LayerConfig():

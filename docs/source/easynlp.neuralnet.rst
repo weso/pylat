@@ -6,7 +6,7 @@ Subpackages
 
 .. toctree::
 
-    easynlp.neuralnet.rnn
+    pylat.neuralnet.rnn
 
 Submodules
 ----------
@@ -14,39 +14,39 @@ Submodules
 layers module
 ~~~~~~~~~~~~~
 
-.. automodule:: easynlp.neuralnet.layers
+.. automodule:: pylat.neuralnet.layers
     :members:
     :undoc-members:
     :show-inheritance:
 
-easynlp.neuralnet.logger module
+pylat.neuralnet.logger module
 -------------------------------
 
-.. automodule:: easynlp.neuralnet.logger
+.. automodule:: pylat.neuralnet.logger
     :members:
     :undoc-members:
     :show-inheritance:
 
-easynlp.neuralnet.model module
+pylat.neuralnet.model module
 ------------------------------
 
-.. automodule:: easynlp.neuralnet.model
+.. automodule:: pylat.neuralnet.model
     :members:
     :undoc-members:
     :show-inheritance:
 
-easynlp.neuralnet.trainer module
+pylat.neuralnet.trainer module
 --------------------------------
 
-.. automodule:: easynlp.neuralnet.trainer
+.. automodule:: pylat.neuralnet.trainer
     :members:
     :undoc-members:
     :show-inheritance:
 
-easynlp.neuralnet.utils module
+pylat.neuralnet.utils module
 ------------------------------
 
-.. automodule:: easynlp.neuralnet.utils
+.. automodule:: pylat.neuralnet.utils
     :members:
     :undoc-members:
     :show-inheritance:
@@ -55,7 +55,7 @@ easynlp.neuralnet.utils module
 Module contents
 ---------------
 
-.. automodule:: easynlp.neuralnet
+.. automodule:: pylat.neuralnet
     :members:
     :undoc-members:
     :show-inheritance:

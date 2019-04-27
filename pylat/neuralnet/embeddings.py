@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from easynlp.exceptions import InvalidArgumentError
+from pylat.exceptions import InvalidArgumentError
 from gensim.models.doc2vec import Doc2Vec, TaggedDocument
 from gensim.models.word2vec import Word2Vec
 from sklearn.exceptions import NotFittedError

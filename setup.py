@@ -1,12 +1,12 @@
 from setuptools import setup
 
 setup(
-    name='easynlp',
+    name='pylat',
     version='0.1.0a0',
-    packages=['easynlp', 'easynlp.data', 'easynlp.util', 'easynlp.wrapper',
-              'easynlp.wrapper.predictor', 'easynlp.wrapper.transformer',
-              'easynlp.neuralnet', 'easynlp.neuralnet.rnn'],
-    url='https://github.com/alejgh/easynlp',
+    packages=['pylat', 'pylat.data', 'pylat.util', 'pylat.wrapper',
+              'pylat.wrapper.predictor', 'pylat.wrapper.transformer',
+              'pylat.neuralnet', 'pylat.neuralnet.rnn'],
+    url='https://github.com/alejgh/pylat',
     license='MIT',
     author='Alejandro González Hevia',
     author_email='alejandrgh11@gmail.com',

@@ -1,4 +1,4 @@
-from easynlp.wrapper.transformer.base import BaseTransformer
+from pylat.wrapper.transformer.base import BaseTransformer
 from sklearn.base import TransformerMixin
 
 import numpy as np
@@ -32,9 +32,9 @@ class WordEmbeddingsTransformer(BaseTransformer, TransformerMixin):
 
     Examples
     --------
-    >>> from easynlp.wrapper.transformer.embeddings_transformer import \
+    >>> from pylat.wrapper.transformer.embeddings_transformer import \
             WordEmbeddingsTransformer
-    >>> from easynlp.neuralnet.embeddings import GensimConfig, Word2VecEmbedding
+    >>> from pylat.neuralnet.embeddings import GensimConfig, Word2VecEmbedding
     >>> X = [['Sample', 'text'], ['another', 'one'], ['last', 'one']]
     >>> # arguments passed in order to make execution deterministic
     >>> config = GensimConfig(size=2, epochs=5, workers=1, seed=42, \
@@ -134,9 +134,9 @@ class DocumentEmbeddingsTransformer(BaseTransformer):
 
     Examples
     --------
-    >>> from easynlp.wrapper.transformer.embeddings_transformer import \
+    >>> from pylat.wrapper.transformer.embeddings_transformer import \
             DocumentEmbeddingsTransformer
-    >>> from easynlp.neuralnet.embeddings import GensimConfig, Doc2VecEmbedding
+    >>> from pylat.neuralnet.embeddings import GensimConfig, Doc2VecEmbedding
     >>> X = [['Sample', 'text'], ['another', 'one'], ['last', 'one']]
     >>> # arguments passed in order to make execution deterministic
     >>> config = GensimConfig(size=2, epochs=5, workers=1, seed=42, \

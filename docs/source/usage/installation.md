@@ -1,5 +1,5 @@
 # Installation
 This library can be installed using pip:
 ```
-pip install easynlp
+pip install pylat
 ```

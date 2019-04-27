@@ -1,5 +1,5 @@
-from easynlp.wrapper.transformer.dataframe_selector import DataFrameSelector
-from easynlp.exceptions import InvalidArgumentError
+from pylat.wrapper.transformer.dataframe_selector import DataFrameSelector
+from pylat.exceptions import InvalidArgumentError
 
 import numpy as np
 import pandas as pd

@@ -1,4 +1,4 @@
-easynlp package
+pylat package
 ===============
 
 Subpackages
@@ -6,18 +6,18 @@ Subpackages
 
 .. toctree::
 
-    easynlp.data
-    easynlp.neuralnet
-    easynlp.util
-    easynlp.wrapper
+    pylat.data
+    pylat.neuralnet
+    pylat.util
+    pylat.wrapper
 
 Submodules
 ----------
 
-easynlp.exceptions module
+pylat.exceptions module
 -------------------------
 
-.. automodule:: easynlp.exceptions
+.. automodule:: pylat.exceptions
     :members:
     :undoc-members:
     :show-inheritance:
@@ -26,7 +26,7 @@ easynlp.exceptions module
 Module contents
 ---------------
 
-.. automodule:: easynlp
+.. automodule:: pylat
     :members:
     :undoc-members:
     :show-inheritance:

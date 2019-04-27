@@ -1,7 +1,7 @@
-easynlp
+pylat
 =======
 
 .. toctree::
    :maxdepth: 4
 
-   easynlp
+   pylat

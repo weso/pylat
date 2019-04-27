@@ -6,6 +6,6 @@ install:
   - pip install --progress-bar off -r requirements.txt
   - pip install --progress-bar off pytest-cov pytest-faulthandler
 script:
-  - py.test --cov-report=xml --cov=easynlp
+  - py.test --cov-report=xml --cov=pylat
 after_success:
   - bash < (curl -s https://codecov.io/bash)

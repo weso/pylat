@@ -6,13 +6,13 @@ Subpackages
 
 .. toctree::
 
-    easynlp.wrapper.predictor
-    easynlp.wrapper.transformer
+    pylat.wrapper.predictor
+    pylat.wrapper.transformer
 
 Module contents
 ---------------
 
-.. automodule:: easynlp.wrapper
+.. automodule:: pylat.wrapper
     :members:
     :undoc-members:
     :show-inheritance:

@@ -1,6 +1,6 @@
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.exceptions import NotFittedError
-from easynlp.exceptions import InvalidArgumentError
+from pylat.exceptions import InvalidArgumentError
 
 import en_core_web_sm, es_core_news_sm
 
@@ -62,7 +62,7 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
 
     Examples
     --------
-    >>> from easynlp.wrapper.transformer.text_preprocessor import TextPreprocessor
+    >>> from pylat.wrapper.transformer.text_preprocessor import TextPreprocessor
     >>> X = ['Hi, how are you doing?']
     >>> base_preprocessor = TextPreprocessor()
     >>> print(base_preprocessor.fit_transform(X))
