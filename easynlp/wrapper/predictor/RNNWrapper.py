@@ -31,17 +31,18 @@ class RNNWrapper(BaseEstimator, ClassifierMixin):
     def fit(self, X, y, **fit_args):
         self.trainer.train(X, y)
 
-    def predict(self, x):
+    def predict(self, x, **params):
         self.logger.info('Predict x: %s', np.shape(x))
         if self.model.session is None:
             raise NotFittedError
         else:
-            probabilities = self._predict_proba(x)
+            probabilities = self._predict_proba(x, **params)
             return np.argmax(probabilities, axis=1)
 
-    def _predict_proba(self, x):
+    def _predict_proba(self, x, **params):
         self.logger.info('Predict probabilities of x: %s', np.shape(x))
         with self.model.session.as_default():
+            self.model.additional_inits(**params)
             return self.model.prediction.eval(feed_dict={
                 self.model.x_t: x
             })

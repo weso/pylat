@@ -150,30 +150,30 @@ class RecurrentNeuralNetwork(BaseNeuralNetwork):
                                   name='x_input')
         self.y_t = tf.placeholder(tf.int64, shape=[None], name='y_input')
         with tf.name_scope('embeddings'):
-            self._np_emb = np.array(self.w2v_embeddings.get_vectors())
-            vocab_size, emb_dim = np.shape(self._np_emb)
+            np_emb = np.array(self.w2v_embeddings.get_vectors())
+            vocab_size, emb_dim = np.shape(np_emb)
             embeddings = tf.Variable(
                 tf.constant(0.0, shape=[vocab_size, emb_dim]),
                 trainable=False, name="W")
-            self._embedding_placeholder = tf.placeholder(tf.float32,
-                                                         [vocab_size, emb_dim])
-            self._embedding_init = embeddings.assign(self._embedding_placeholder)
+            self._emb_placeholder = tf.placeholder(tf.float32,
+                                                   [vocab_size, emb_dim],
+                                                   name='emb_plh')
+            self._emb_init = embeddings.assign(self._emb_placeholder,
+                                               name='emb_init')
             rnn_inputs = tf.nn.embedding_lookup(embeddings, self.x_t)
         return rnn_inputs
 
-    def additional_inits(self):
-        self.session.run(self._embedding_init, feed_dict={
-            self._embedding_placeholder: self._np_emb
+    def additional_inits(self, **params):
+        self.session.run(self._emb_init, feed_dict={
+            self._emb_placeholder: self.w2v_embeddings.get_vectors(**params)
         })
-        self._np_emb = None
-        del self._np_emb
 
     def save(self, save_path):
         inputs = {"x_t": self.x_t}
         outputs = {"pred_proba": self.prediction}
         tf.saved_model.simple_save(self.session, save_path, inputs, outputs)
 
-    def restore(self, save_path):
+    def restore(self, save_path, **params):
         graph = tf.Graph()
         self.session = tf.Session(graph=graph)
         tf.saved_model.loader.load(
@@ -183,3 +183,6 @@ class RecurrentNeuralNetwork(BaseNeuralNetwork):
         )
         self.x_t = graph.get_tensor_by_name('input/x_input:0')
         self.softmax = graph.get_tensor_by_name('dnn/y_proba:0')
+        self._emb_init = graph.get_tensor_by_name('input/embeddings/emb_init:0')
+        self._emb_placeholder = graph.get_tensor_by_name('input/embeddings/'
+                                                         'emb_plh:0')
