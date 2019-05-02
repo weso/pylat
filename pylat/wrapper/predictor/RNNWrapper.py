@@ -46,3 +46,9 @@ class RNNWrapper(BaseEstimator, ClassifierMixin):
             return self.model.prediction.eval(feed_dict={
                 self.model.x_t: x
             })
+
+    def save(self, save_path):
+        self.model.save(save_path)
+
+    def restore(self, save_path):
+        self.model.restore(save_path)

@@ -181,6 +181,15 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
             setattr(self, parameter, value)
         return self
 
+    def __getstate__(self):
+        state = self.__dict__.copy()
+        del state['custom_nlp']
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self.__dict__['custom_nlp'] = None
+
     def _assert_valid_types(self):
         if not isinstance(self.remove_stop_words, bool):
             raise InvalidArgumentError('remove_stop_words', 'Remove stop words option must be True or False.')
