@@ -189,6 +189,7 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
     def __setstate__(self, state):
         self.__dict__.update(state)
         self.__dict__['custom_nlp'] = None
+        self.fit([]) # reload nlp attribute
 
     def _assert_valid_types(self):
         if not isinstance(self.remove_stop_words, bool):
