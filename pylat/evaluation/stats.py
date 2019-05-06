@@ -119,15 +119,39 @@ def stuart_maxwell_test(y_pred1, y_pred2):
     conf_matrix = confusion_matrix(y_pred1, y_pred2)
     n = np.sum(conf_matrix, axis=1)
     n_prime = np.sum(conf_matrix, axis=0)
-    _check_valid(conf_matrix, n, n_prime)
     k = conf_matrix.shape[0]
+    conf_matrix, n, n_prime = _remove_agreements(conf_matrix, n, n_prime)
     d = [n[i] - n_prime[i] for i in range(k)]
-    S = something really strange
-    return np.transpose(d) * np.linalg.inv(S) * d
+    s = _build_s_matrix(conf_matrix, n, n_prime, k)
+    return np.transpose(d) * np.linalg.inv(s) * d
 
-def _check_valid(conf_matrix, n, n_prime):
+
+def _build_s_matrix(conf_matrix, n, n_prime, k):
+    s = np.zeros(shape=(k-1, k-1))
+    for i in range(s.shape[0]):
+        for j in range(s.shape[1]):
+            if i == j:
+                s[i, j] = n[i] + n_prime[i] - 2*conf_matrix[i, i]
+            else:
+                s[i, j] = -(conf_matrix[i, j] + conf_matrix[j, i])
+    return s
+
+
+def _remove_agreements(conf_matrix, n, n_prime):
     # check that there is not agreement
-    pass
+    agreement_rows = []
+    for i in range(len(n)):
+        if conf_matrix[i][i] == n[i] and n[i] == n_prime:
+            agreement_rows.append(i)
+    if len(agreement_rows) == 2:
+        raise InvalidArgumentError()
+    elif len(agreement_rows) == 1:
+        invalid_row = agreement_rows[0]
+        del conf_matrix[invalid_row]
+        del n[invalid_row]
+        del n_prime[invalid_row]
+    return conf_matrix, n, n_prime
+
 
 def _build_contingency_table(clf1, clf2):
     table = np.zeros(shape=(2, 2), dtype=np.int)
