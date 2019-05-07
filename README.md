@@ -1,5 +1,46 @@
 # pylat
 
+<table>
+<tr>
+  <td>Latest Release</td>
+  <td>
+    <a href="https://pypi.org/project/pylat/">
+    <img src="https://badge.fury.io/py/pylat.svg" alt="latest release" />
+    </a>
+  </td>
+<tr>
+  <td>Package Status</td>
+  <td>
+		<a href="https://pypi.org/project/pylat/">
+		<img src="https://img.shields.io/pypi/status/pandas.svg" alt="status" />
+		</a>
+  </td>
+</tr>
+<tr>
+  <td>License</td>
+  <td>
+    <a href="https://github.com/alejgh/pylat/blob/master/LICENSE">
+    <img src="https://img.shields.io/github/license/alejgh/pylat.svg" alt="license" />
+    </a>
+</td>
+</tr>
+<tr>
+  <td>Build Status</td>
+  <td>
+    <a href="https://travis-ci.org/pylat">
+    <img src="https://travis-ci.org/alejgh/pylat.svg?branch=master" alt="travis build status" />
+    </a>
+  </td>
+</tr>
+<tr>
+  <td>Coverage</td>
+  <td>
+    <img src="https://codecov.io/gh/alejgh/pylat/branch/master/graph/badge.svg" alt="coverage" />
+    </a>
+  </td>
+</tr>
+</table>
+
 ## What is it?
 **pylat** is a Python package that provides an easy way to create machine learning models that work with textual data.
 It contains utilities to handle all the common steps needed in every NLP project, so developers don't need to reinvent
