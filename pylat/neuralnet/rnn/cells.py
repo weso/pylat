@@ -16,11 +16,8 @@ class LSTMCellFactory(BaseCellFactory):
     """Factory that creates variations of the LSTM cell."""
 
     def __call__(self, num_units, activation, kernel_init, dropout, layer_norm):
-        if layer_norm:
-            return tf.contrib.rnn.LayerNormBasicLSTMCell(num_units,
-                                                         layer_norm=True)
-        else:
-            return tf.keras.layers.LSTMCell(num_units, dropout=dropout)
+            return tf.keras.layers.LSTMCell(num_units, dropout=dropout,
+                                            name='lstm')
 
 
 class GRUCellFactory(BaseCellFactory):
@@ -29,7 +26,7 @@ class GRUCellFactory(BaseCellFactory):
     def __call__(self, num_units, activation, kernel_init, dropout, layer_norm):
         return tf.keras.layers.GRUCell(num_units, activation,
                                        kernel_initializer=kernel_init,
-                                       dropout=dropout)
+                                       dropout=dropout, name='gru')
 
 
 class SimpleCellFactory(BaseCellFactory):
@@ -38,4 +35,5 @@ class SimpleCellFactory(BaseCellFactory):
     def __call__(self, num_units, activation, kernel_init, dropout, layer_norm):
         return tf.keras.layers.SimpleRNNCell(num_units, activation,
                                              kernel_initializer=kernel_init,
-                                             dropout=dropout)
+                                             dropout=dropout,
+                                             name='simple_cell')

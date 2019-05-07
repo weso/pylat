@@ -1,4 +1,6 @@
 from ..model import BaseNeuralNetwork
+from ...exceptions import InvalidArgumentError
+
 from tensorflow.python.saved_model import tag_constants
 
 import numpy as np
@@ -70,8 +72,6 @@ class RecurrentNeuralNetwork(BaseNeuralNetwork):
         self.fc_layers = fc_layers
         self.learning_rate = learning_rate
         self.optimizer = optimizer
-        self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(logging.INFO)
         self.random_seed = random_seed
         self.w2v_embeddings = embeddings
         self.softmax = None
@@ -80,8 +80,12 @@ class RecurrentNeuralNetwork(BaseNeuralNetwork):
         self.accuracy = None
         self._num_classes = 0
         self._num_steps = 0
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(logging.INFO)
+        self._check_valid_params()
 
     def init_model(self, X, y):
+        RecurrentNeuralNetwork._assert_valid_input(X, y)
         self._check_input(X, y)
         self.logger.info('Building graph. Num steps: %s', self._num_steps)
         tf.set_random_seed(self.random_seed)
@@ -186,3 +190,22 @@ class RecurrentNeuralNetwork(BaseNeuralNetwork):
         self._emb_init = graph.get_tensor_by_name('input/embeddings/emb_init:0')
         self._emb_placeholder = graph.get_tensor_by_name('input/embeddings/'
                                                          'emb_plh:0')
+
+    def _check_valid_params(self):
+        if len(self.fc_layers) == 0 or len(self.rnn_layers) == 0:
+            raise InvalidArgumentError('layers', 'Layers must not be empty.')
+
+    @staticmethod
+    def _assert_valid_input(X, y):
+        try:
+            np_x = np.asarray(X)
+            np_y = np.asarray(y)
+        except Exception:
+            raise InvalidArgumentError('x/y', 'X and y must be iterables.')
+
+        if len(np_x.shape) != 2:
+            raise InvalidArgumentError('x',
+                                       'X array must have 2 dimensions.')
+        if len(np_y.shape) != 1:
+            raise InvalidArgumentError('y',
+                                       'y array must have 1 dimension.')

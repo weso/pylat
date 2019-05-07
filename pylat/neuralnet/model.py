@@ -1,7 +1,9 @@
+import numpy as np
 import os
 import tensorflow as tf
 
 from abc import ABC, abstractmethod
+from ..exceptions import InvalidArgumentError
 
 
 class BaseNeuralNetwork(ABC):
@@ -15,7 +17,7 @@ class BaseNeuralNetwork(ABC):
         self.init = None
 
     def init_model(self, X, y):
-        self.session = tf.Session(config=tf.ConfigProto(log_device_placement=True))
+        self.session = tf.Session()
         self.prediction
         self.optimize
         self.error

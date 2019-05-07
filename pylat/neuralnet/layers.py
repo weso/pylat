@@ -26,6 +26,7 @@ class BaseLayer(ABC):
         self.kernel_init = kernel_init
         self.activation = activation
         self.dropout_rate = dropout_rate
+        self._check_valid_params()
 
     def load_config(self, layer_config):
         if not isinstance(layer_config, LayerConfig):
@@ -42,12 +43,20 @@ class BaseLayer(ABC):
     def build_tensor(self, inputs, **kwargs):
         pass
 
+    def _check_valid_params(self):
+        if self.dropout_rate is None:
+            return
+        elif self.dropout_rate < 0 or self.dropout_rate > 1:
+            raise InvalidArgumentError('dropout_rate', 'Dropout rate must be '
+                                       'a float between 0 and 1.')
+
 
 class DenseLayer(BaseLayer):
     def build_tensor(self, inputs, **kwargs):
         output = tf.keras.layers.Dense(self.num_units,
                                      kernel_initializer=self.kernel_init,
-                                     activation=self.activation)(inputs)
+                                     activation=self.activation,
+                                     name='dense_layer')(inputs)
         if self.dropout_rate is not None:
             output = tf.keras.layers.Dropout(self.dropout_rate)(output,
                                                                 **kwargs)

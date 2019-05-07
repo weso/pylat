@@ -1,4 +1,5 @@
 import logging
+import math
 import numpy as np
 import tensorflow as tf
 
@@ -29,6 +30,7 @@ class BaseTrainer(ABC):
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging.INFO)
         self.saver = None
+        self._epochs_completed = 0
 
     def train(self, X, y):
         self.logger.info('Creating model...')
@@ -41,7 +43,7 @@ class BaseTrainer(ABC):
 
     def _train_loop(self, X, y):
         self.on_train_loop_started(X, y)
-        num_batches = len(self.X_train) // self.batch_size + 1
+        num_batches = math.ceil(len(self.X_train) / self.batch_size)
         for epoch in range(self.num_epochs):
             stop_train = self._epoch_loop(epoch, num_batches)
             if stop_train:
@@ -69,12 +71,14 @@ class BaseTrainer(ABC):
         return self.on_epoch_finished(train_loss, train_accuracy)
 
     def on_train_loop_started(self, X, y):
+        self._epochs_completed = 0
         self.X_train = X
         self.y_train = y
 
     def on_epoch_finished(self, loss, acc):
         self.logger.info('Train: Loss = {:.3f} - Accuracy = {:.3f}'.format(
             loss, acc * 100))
+        self._epochs_completed += 1
         return False
 
     def on_train_finished(self):
@@ -82,10 +86,10 @@ class BaseTrainer(ABC):
 
 
 class EarlyStoppingTrainer(BaseTrainer):
-    def __init__(self, model, batch_size, num_epochs,
+    def __init__(self, model, num_epochs, batch_size,
                  validation_split=0.2, validation_data=None,
                  max_epochs_no_progress=5, random_seed=42):
-        super().__init__(model, batch_size, num_epochs)
+        super().__init__(model, num_epochs, batch_size)
         self.validation_split = validation_split
         self.validation_data = validation_data
         self.max_epochs_without_progress = max_epochs_no_progress
