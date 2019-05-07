@@ -65,7 +65,5 @@ pip install pylat
 ## License
 [GPL-3](LICENSE)
 
-https://travis-ci.org/alejgh/pylat.svg?branch=master
-
 ## Documentation
 The official documentation will be hosted at ReadTheDocs.org
