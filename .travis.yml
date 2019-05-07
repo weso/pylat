@@ -2,6 +2,8 @@ language: python
 python:
   - "3.6"
 dist: xenial
+before_install:
+  - export BOTO_CONFIG=/dev/null
 install:
   - pip install --progress-bar off -r requirements.txt
   - pip install --progress-bar off pytest-cov pytest-faulthandler
