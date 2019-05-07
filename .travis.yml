@@ -6,8 +6,8 @@ before_install:
   - export BOTO_CONFIG=/dev/null
 install:
   - pip install --progress-bar off -r requirements.txt
-  - pip install --progress-bar off pytest-cov pytest-faulthandler
+  - pip install --progress-bar off pytest-cov pytest-faulthandler codecov
 script:
   - py.test --cov-report=xml --cov=pylat
 after_success:
-  - bash < (curl -s https://codecov.io/bash)
+  - codecov
