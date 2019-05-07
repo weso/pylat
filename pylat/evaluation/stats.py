@@ -1,6 +1,8 @@
 from ..exceptions import InvalidArgumentError
 from sklearn.metrics import confusion_matrix
 
+from scipy import stats
+
 import numpy as np
 
 import math
@@ -8,10 +10,10 @@ import math
 
 # constant values used in the wilson score interval
 confidence_interval_to_const = {
-    0.90: 1.64,
-    0.95: 1.96,
-    0.98: 2.33,
-    0.99: 2.58
+    90: 1.64,
+    95: 1.96,
+    98: 2.33,
+    99: 2.58
 }
 
 
@@ -25,9 +27,9 @@ def wilson_score_interval(error, n, confidence):
         between 0 and 1.
     n : int
         Number of samples in the data.
-    confidence : float
+    confidence : int
         Value of confidence to be used when calculating the interval. Valid
-        values are 0.90, 0.95, 0.98 and 0.99.
+        values are 90, 95, 98 and 99.
 
     Returns
     -------
@@ -39,15 +41,20 @@ def wilson_score_interval(error, n, confidence):
     >>> from pylat.evaluation.stats import wilson_score_interval
     >>> n = 200  # 200 samples
     >>> error = 0.15  # model misclassified 15% of the samples
-    >>> print(wilson_score_interval(error, n, 0.90))  # 90% confidence
-
-    >>> print(wilson_score_interval(error, n, 0.95))  # 95% confidence
-
-    >>> print(wilson_score_interval(error, n, 0.99))  # 99% confidence
-
-    >>> print(wilson_score_interval(error, n, 0.79))  # invalid confidence
-
+    >>> print(round(wilson_score_interval(error, n, 90), 3))  # 90% confidence
+    0.041
+    >>> print(round(wilson_score_interval(error, n, 95), 3))  # 95% confidence
+    0.049
+    >>> print(round(wilson_score_interval(error, n, 99), 3))  # 99% confidence
+    0.065
     """
+    if error < 0 or error > 1:
+        raise InvalidArgumentError('error', 'Invalid error value. Error must '
+                                            'be a value between 0 and 1.')
+    elif n <= 0:
+        raise InvalidArgumentError('n', 'Number of samples must be greater '
+                                        'than 0.')
+
     try:
         const = confidence_interval_to_const[confidence]
     except KeyError:
@@ -84,12 +91,20 @@ def mcnemar_test(y_pred1, y_pred2, y_true):
         Float bounded between 0 and 1, containing the result of applying the
         McNemar test.
     """
+    if len(y_pred1) != len(y_pred2) or len(y_pred1) != len(y_true):
+        raise InvalidArgumentError('y_pred', 'Predictions must have '
+                                             'the same length.')
+    elif len(np.unique(y_true)) != 2:
+        raise InvalidArgumentError('num_labels', 'Number of labels must be '
+                                                 'equal to 2. Use the stuart-'
+                                                 'maxwell test instead.')
+
     classif1_correct = [1 if y_pred1[i] == y_true[i] else 0
                         for i, _ in enumerate(y_pred1)]
     classif2_correct = [1 if y_pred2[i] == y_true[i] else 0
                         for i, _ in enumerate(y_pred2)]
     table = _build_contingency_table(classif1_correct, classif2_correct)
-    return math.pow(table[0, 1] - table[1, 0], 2) / (table[0, 1] - table[1, 0])
+    return math.pow(table[0, 1] - table[1, 0], 2) / (table[0, 1] + table[1, 0])
 
 
 def stuart_maxwell_test(y_pred1, y_pred2):
@@ -97,8 +112,8 @@ def stuart_maxwell_test(y_pred1, y_pred2):
 
     Notes
     -----
-    This method is equivalent to calling :func:`~mcnemar_test` if called with the
-    predictions of two binary classifiers.
+    This method is equivalent to calling :func:`~mcnemar_test` if called with
+    the predictions of two binary classifiers.
 
     If the two predictions agree on more than 1 label (they produce the same
     outpus for that label), this method will return an error since the
@@ -116,14 +131,18 @@ def stuart_maxwell_test(y_pred1, y_pred2):
     float
         Float bounded between 0 and 1 containing the result of the
     """
+    if len(y_pred1) != len(y_pred2):
+        raise InvalidArgumentError('y_pred', 'Both predictions must have '
+                                             'the same length.')
     conf_matrix = confusion_matrix(y_pred1, y_pred2)
     n = np.sum(conf_matrix, axis=1)
     n_prime = np.sum(conf_matrix, axis=0)
     k = conf_matrix.shape[0]
     conf_matrix, n, n_prime = _remove_agreements(conf_matrix, n, n_prime)
-    d = [n[i] - n_prime[i] for i in range(k)]
+    d = [n[i] - n_prime[i] for i in range(k - 1)]
     s = _build_s_matrix(conf_matrix, n, n_prime, k)
-    return np.transpose(d) * np.linalg.inv(s) * d
+    chi2 = np.dot(np.dot(d, np.linalg.inv(s)), np.transpose(d))
+    return stats.distributions.chi2.sf(chi2, 2)
 
 
 def _build_s_matrix(conf_matrix, n, n_prime, k):
@@ -141,26 +160,30 @@ def _remove_agreements(conf_matrix, n, n_prime):
     # check that there is not agreement
     agreement_rows = []
     for i in range(len(n)):
-        if conf_matrix[i][i] == n[i] and n[i] == n_prime:
+        if conf_matrix[i][i] == n[i] and n[i] == n_prime[i]:
             agreement_rows.append(i)
     if len(agreement_rows) == 2:
-        raise InvalidArgumentError()
+        raise InvalidArgumentError('y_pred', "Stuart maxwell test can't be"
+                                             "performed when the classifiers"
+                                             "agree in more than one label.")
     elif len(agreement_rows) == 1:
-        invalid_row = agreement_rows[0]
-        del conf_matrix[invalid_row]
-        del n[invalid_row]
-        del n_prime[invalid_row]
+        invalid_idx = agreement_rows[0]
+        conf_matrix = np.delete(conf_matrix, invalid_idx, axis=0)
+        conf_matrix = np.delete(conf_matrix, invalid_idx, axis=1)
+        n = np.delete(n, invalid_idx, axis=0)
+        n_prime = np.delete(n_prime, invalid_idx, axis=0)
     return conf_matrix, n, n_prime
 
 
 def _build_contingency_table(clf1, clf2):
     table = np.zeros(shape=(2, 2), dtype=np.int)
+    combined = [(i, j) for i, j in zip(clf1, clf2)]
     # clf1 and clf2 correct
-    table[0, 0] = np.sum(clf1 == 1) + np.sum(clf2 == 1)
+    table[0, 0] = sum([1 if x == (1, 1) else 0 for x in combined])
     # clf1 correct, clf2 incorrect
-    table[0, 1] = np.sum(clf1 == 1) + np.sum(clf2 == 0)
+    table[0, 1] = sum([1 if x == (1, 0) else 0 for x in combined])
     # clf1 incorrect, clf2 correct
-    table[1, 0] = np.sum(clf1 == 0) + np.sum(clf2 == 1)
+    table[1, 0] = sum([1 if x == (0, 1) else 0 for x in combined])
     # clf1 and clf2 incorrect
-    table[1, 1] = np.sum(clf1 == 0) + np.sum(clf2 == 0)
+    table[1, 1] = sum([1 if x == (0, 0) else 0 for x in combined])
     return table
