@@ -27,7 +27,7 @@
 <tr>
   <td>Build Status</td>
   <td>
-    <a href="https://travis-ci.org/pylat">
+    <a href="https://travis-ci.org/alejgh/pylat">
     <img src="https://travis-ci.org/alejgh/pylat.svg?branch=master" alt="travis build status" />
     </a>
   </td>
@@ -35,6 +35,7 @@
 <tr>
   <td>Coverage</td>
   <td>
+    <a href="https://codecov.io/gh/alejgh/pylat">
     <img src="https://codecov.io/gh/alejgh/pylat/branch/master/graph/badge.svg" alt="coverage" />
     </a>
   </td>
