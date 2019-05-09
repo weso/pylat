@@ -3,7 +3,7 @@ import math
 import numpy as np
 import tensorflow as tf
 
-from abc import ABC, abstractmethod
+from abc import ABC
 from sklearn.model_selection import train_test_split
 from .utils import get_next_batch
 

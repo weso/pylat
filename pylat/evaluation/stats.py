@@ -159,7 +159,7 @@ def _build_s_matrix(conf_matrix, n, n_prime, k):
 def _remove_agreements(conf_matrix, n, n_prime):
     # check that there is not agreement
     agreement_rows = []
-    for i in range(len(n)):
+    for i, _ in enumerate(n):
         if conf_matrix[i][i] == n[i] and n[i] == n_prime[i]:
             agreement_rows.append(i)
     if len(agreement_rows) == 2:

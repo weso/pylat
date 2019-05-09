@@ -348,7 +348,7 @@ class CrossLingualPretrainedEmbedding(BaseWordEmbedding):
 
 
 def _assert_valid_train_data(train_data):
-    if not hasattr(train_data, '__iter__') or type(train_data) == str:
+    if not hasattr(train_data, '__iter__') or isinstance(train_data, str):
         raise InvalidArgumentError('train_data', 'Train data must be an '
                                                  'iterable of tokens.')
     elif len(train_data) == 0:

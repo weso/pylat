@@ -1,9 +1,7 @@
-import numpy as np
 import os
 import tensorflow as tf
 
 from abc import ABC, abstractmethod
-from ..exceptions import InvalidArgumentError
 
 
 class BaseNeuralNetwork(ABC):
@@ -25,15 +23,15 @@ class BaseNeuralNetwork(ABC):
         self.session.run(self.init)
         self.additional_inits()
 
+    def additional_inits(self):
+        pass
+
     @abstractmethod
     def save(self, save_path):
         pass
 
     @abstractmethod
     def restore(self, save_path):
-        pass
-
-    def additional_inits(self):
         pass
 
     @property
