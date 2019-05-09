@@ -269,33 +269,50 @@ class Word2VecEmbedding(BaseWordEmbedding):
 
 
 class CrossLingualPretrainedEmbedding(BaseWordEmbedding):
-    def __init__(self, embeddings_dir):
+    def __init__(self, embeddings_dir, language=None):
         self.embeddings_dir = embeddings_dir
         self.embeddings_dict = {}
+        self.language = language
 
-    def train(self, train_data, **params):
+    def train(self, train_data):
         pass
 
-    def to_vector(self, token, **params):
-        embeddings = self._get_embeddings_from(**params)
+    def to_vector(self, token):
+        embeddings = self._get_embeddings()
         try:
             index = embeddings.word2index[token]
             return embeddings.wv[index]
         except KeyError:
             return None
 
-    def to_id(self, token, **params):
+    def set_language(self, language):
+        self.language = language
+
+    def to_id(self, token):
         try:
-            return self._get_embeddings_from(**params).word2index[token]
+            return self._get_embeddings().word2index[token]
         except KeyError:
             return None
 
-    def to_word(self, token_id, **params):
-        return self._get_embeddings_from(**params).index2word[token_id]
+    def to_word(self, token_id):
+        return self._get_embeddings().index2word[token_id]
 
-    def get_vectors(self, **params):
-        embeddings = self._get_embeddings_from(**params)
+    def get_vectors(self):
+        embeddings = self._get_embeddings()
         return embeddings.wv
+
+    def _get_embeddings(self):
+        if self.language is None:
+            logger.warning('Language attribute was not specified. Input '
+                           'sentences are assumed to be in English.')
+            language = 'en'
+        else:
+            language = self.language
+
+        if self.embeddings_dict.get(language) is None:
+            logger.info("Embeddings not available in cache, loading them...")
+            self._load_vector(language)
+        return self.embeddings_dict[language]
 
     def _load_vector(self, language):
         vector_path = os.path.join(self.embeddings_dir, language)
@@ -306,20 +323,6 @@ class CrossLingualPretrainedEmbedding(BaseWordEmbedding):
         wv = np.load(vector_path + '.npy')
         self.embeddings_dict[language] = self.LoadedEmbedding(wv, index2word,
                                                               word2index)
-
-    def _get_embeddings_from(self, **params):
-        if params.get('language') is None:
-            logger.warning('Language parameter was not specified. Input '
-                           'sentences are assumed to be in English.')
-            language = 'en'
-        else:
-            language = params['language']
-
-        if self.embeddings_dict.get(language) is None:
-            logger.info("Embeddings not available in cache, loading them...")
-            self._load_vector(language)
-
-        return self.embeddings_dict[language]
 
     def _assert_files_exist(self, vector_path, language):
         if not os.path.exists(vector_path + '.vocab'):

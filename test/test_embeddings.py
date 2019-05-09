@@ -62,15 +62,18 @@ class TestEmbeddings(unittest.TestCase):
 
     def test_spanish_multilingual_embedding(self):
         model = CrossLingualPretrainedEmbedding(self.embeddings_dir)
-        self.assertEqual(model.to_id('amigo', language='es'), 0)
-        np.testing.assert_allclose(model.to_vector('amor', language='es'),
+        model.set_language('es')
+        self.assertEqual(model.to_id('amigo'), 0)
+        np.testing.assert_allclose(model.to_vector('amor'),
                                    np.asarray([0.7, 0.2, 0.4]))
 
     def test_change_language_multilingual_embedding(self):
         model = CrossLingualPretrainedEmbedding(self.embeddings_dir)
-        self.assertEqual(model.to_id('tierno', language='es'), 4)
-        self.assertEqual(model.to_id('tierno', language='en'), None)
-        np.testing.assert_allclose(model.to_vector('cute', language='en'),
+        model.set_language('es')
+        self.assertEqual(model.to_id('tierno'), 4)
+        model.set_language('en')
+        self.assertEqual(model.to_id('tierno'), None)
+        np.testing.assert_allclose(model.to_vector('cute'),
                                    np.asarray([0.3, 0.8, 0.6]))
 
     def test_no_language_set_multilingual_embedding(self):
@@ -80,8 +83,9 @@ class TestEmbeddings(unittest.TestCase):
 
     def test_invalid_language_multilingual_embedding(self):
         model = CrossLingualPretrainedEmbedding(self.embeddings_dir)
+        model.set_language('ko')
         with pytest.raises(InvalidArgumentError):
-            model.to_id('친구', language='ko')
+            model.to_id('친구')
 
     def test_save_embeddings(self):
         conf = GensimConfig(size=2, min_count=1)
