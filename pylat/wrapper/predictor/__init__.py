@@ -1,1 +1,5 @@
-__author__ = 'Alejandro González Hevia'
+from .RNNWrapper import RNNWrapper
+
+__all__ = [
+    'RNNWrapper'
+]

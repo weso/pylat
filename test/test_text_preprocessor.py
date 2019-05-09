@@ -4,7 +4,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.model_selection import GridSearchCV
 
-from pylat.wrapper.transformer.text_preprocessor import TextPreprocessor
+from pylat.wrapper.transformer import TextPreprocessor
 from pylat.exceptions import InvalidArgumentError
 
 import logging
