@@ -1,4 +1,4 @@
-from pylat.wrapper.transformer.dataframe_selector import DataFrameSelector
+from pylat.wrapper.transformer import DataFrameSelector
 from pylat.exceptions import InvalidArgumentError
 
 import numpy as np

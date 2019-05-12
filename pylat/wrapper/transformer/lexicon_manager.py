@@ -79,7 +79,7 @@ class LexiconManager():
         :param text: List of tokens which are present in the text.
         :return: float normalized number with the specified score
         """
-        if not hasattr(text, '__iter__') or type(text) == str:
+        if not hasattr(text, '__iter__') or isinstance(text, str):
             raise InvalidArgumentError('text', 'Text must be an iterable of tokens')
         result = 0
         words_used = 0

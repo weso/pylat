@@ -167,9 +167,9 @@ class RecurrentNeuralNetwork(BaseNeuralNetwork):
             rnn_inputs = tf.nn.embedding_lookup(embeddings, self.x_t)
         return rnn_inputs
 
-    def additional_inits(self, **params):
+    def additional_inits(self):
         self.session.run(self._emb_init, feed_dict={
-            self._emb_placeholder: self.w2v_embeddings.get_vectors(**params)
+            self._emb_placeholder: self.w2v_embeddings.get_vectors()
         })
 
     def save(self, save_path):
@@ -177,7 +177,7 @@ class RecurrentNeuralNetwork(BaseNeuralNetwork):
         outputs = {"pred_proba": self.prediction}
         tf.saved_model.simple_save(self.session, save_path, inputs, outputs)
 
-    def restore(self, save_path, **params):
+    def restore(self, save_path):
         graph = tf.Graph()
         self.session = tf.Session(graph=graph)
         tf.saved_model.loader.load(
