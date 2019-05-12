@@ -19,24 +19,24 @@
 <tr>
   <td>License</td>
   <td>
-    <a href="https://github.com/alejgh/pylat/blob/master/LICENSE">
-    <img src="https://img.shields.io/github/license/alejgh/pylat.svg" alt="license" />
+    <a href="https://github.com/weso/pylat/blob/master/LICENSE">
+    <img src="https://img.shields.io/github/license/weso/pylat.svg" alt="license" />
     </a>
 </td>
 </tr>
 <tr>
   <td>Build Status</td>
   <td>
-    <a href="https://travis-ci.org/alejgh/pylat">
-    <img src="https://travis-ci.org/alejgh/pylat.svg?branch=master" alt="travis build status" />
+    <a href="https://travis-ci.org/weso/pylat">
+    <img src="https://travis-ci.org/weso/pylat.svg?branch=master" alt="travis build status" />
     </a>
   </td>
 </tr>
 <tr>
   <td>Coverage</td>
   <td>
-    <a href="https://codecov.io/gh/alejgh/pylat">
-    <img src="https://codecov.io/gh/alejgh/pylat/branch/master/graph/badge.svg" alt="coverage" />
+    <a href="https://codecov.io/gh/weso/pylat">
+    <img src="https://codecov.io/gh/weso/pylat/branch/master/graph/badge.svg" alt="coverage" />
     </a>
   </td>
 </tr>
