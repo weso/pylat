@@ -1,11 +1,9 @@
 from pylat.exceptions import InvalidArgumentError
-from pylat.neuralnet.embeddings import Word2VecEmbedding
-from pylat.neuralnet.layers import DenseLayer
-from pylat.neuralnet.trainer import BaseTrainer, EarlyStoppingTrainer
-from pylat.neuralnet.rnn.cells import GRUCellFactory, LSTMCellFactory, \
-    SimpleCellFactory
-from pylat.neuralnet.rnn.layers import BidirectionalRecurrentLayer, RecurrentLayer
-from pylat.neuralnet.rnn.recurrent_neural_network import RecurrentNeuralNetwork
+from pylat.neuralnet import BaseTrainer, DenseLayer, EarlyStoppingTrainer, \
+    LayerConfig, Word2VecEmbedding
+from pylat.neuralnet.rnn import GRUCellFactory, LSTMCellFactory, \
+    SimpleCellFactory, BidirectionalRecurrentLayer, RecurrentLayer,\
+    RecurrentNeuralNetwork
 
 from gensim.models import Word2Vec
 
@@ -66,7 +64,8 @@ class TestRecurrentNeuralNetwork(unittest.TestCase):
                                                   layer_norm=True,
                                                   cell_factory=LSTMCellFactory()
                                                   )]
-        fc_layers = [DenseLayer(num_units=15), DenseLayer(num_units=5)]
+        fc_layers = [DenseLayer(num_units=15, dropout_rate=0.3),
+                     DenseLayer(num_units=5, dropout_rate=0.1)]
         model = RecurrentNeuralNetwork(rnn_layers, fc_layers,
                                        embeddings=self.embeddings)
         trainer = EarlyStoppingTrainer(model, num_epochs=3, batch_size=1,
@@ -89,13 +88,17 @@ class TestRecurrentNeuralNetwork(unittest.TestCase):
             trainer.train(self.x_train, self.y_train)
 
     def test_invalid_data(self):
+        rnn_layers = [RecurrentLayer(num_units=5)]
+        fc_layers = [DenseLayer(num_units=15)]
+        model = RecurrentNeuralNetwork(rnn_layers, fc_layers,
+                                       embeddings=self.embeddings)
+        trainer = BaseTrainer(model)
         with pytest.raises(InvalidArgumentError):
-            rnn_layers = [RecurrentLayer(num_units=5)]
-            fc_layers = [DenseLayer(num_units=15)]
-            model = RecurrentNeuralNetwork(rnn_layers, fc_layers,
-                                           embeddings=self.embeddings)
-            trainer = BaseTrainer(model)
-            trainer.train([1, 2, 3, 4], [1, 2, 3, 4])
+            trainer.train([1, 2, 3, 4], [1, 2, 3, 4])  # x must be 2d
+        with pytest.raises(InvalidArgumentError):
+            trainer.train([[1, 2], [2, 3]], 0)  # y must be 1d
+        with pytest.raises(InvalidArgumentError):
+            trainer.train('asd', 'fgh')  # data must be numbers
 
     def test_invalid_layers(self):
         with pytest.raises(InvalidArgumentError):
@@ -103,6 +106,19 @@ class TestRecurrentNeuralNetwork(unittest.TestCase):
                                            embeddings=self.embeddings)
             trainer = BaseTrainer(model)
             trainer.train(self.x_train, self.y_train)
+
+    def test_layer_config_valid(self):
+        config = LayerConfig(num_units=5)
+        rnn_layer = RecurrentLayer(num_units=2)
+        assert rnn_layer.num_units == 2
+        rnn_layer.load_config(config)
+        assert rnn_layer.num_units == 5
+
+    def test_layer_config_invalid(self):
+        with pytest.raises(InvalidArgumentError):
+            config = 5
+            rnn_layer = RecurrentLayer(num_units=2)
+            rnn_layer.load_config(config)
 
     def test_invalid_cell(self):
         with pytest.raises(InvalidArgumentError):

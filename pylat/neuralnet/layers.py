@@ -5,10 +5,12 @@ from pylat.exceptions import InvalidArgumentError
 
 
 class LayerConfig():
-    def __init__(self, num_units=None, kernel_init=None, activation=None):
+    def __init__(self, num_units=None, kernel_init=None, activation=None,
+                 dropout_rate=None):
         self.num_units = num_units
         self.kernel_init = kernel_init
         self.activation = activation
+        self.dropout_rate = dropout_rate
 
     def get_params(self, deep=True):
         return {
