@@ -5,15 +5,16 @@ import pandas as pd
 
 
 class DataFrameSelector(BaseEstimator, TransformerMixin):
-    """Transformer that receives a pandas Dataframe and returns a subset of its values as a numpy array.
+    """Returns a subset of a pandas DataFrame as a numpy array.
 
-    This transformer is meant to be used as the first transformer in a scikit-learn pipeline. It
-    will receive a pandas DataFrame as input, and the names of the columns that you want to extract
-    from the DataFrame for later use in the pipeline by other transformers.
+    This transformer is meant to be used as the first transformer in a
+    scikit-learn pipeline. It will receive a pandas DataFrame as input,
+    and the names of the columns that you want to extract from the DataFrame
+    for later use in the pipeline by other transformers.
 
     Parameters
     ----------
-    column_names: list of str or str
+    column_names : :obj:`list` of str or str
         List containing the names of the columns that will be extracted
         from the input DataFrame. If you only want to extract one column,
         a single string can be passed instead.
@@ -49,13 +50,27 @@ class DataFrameSelector(BaseEstimator, TransformerMixin):
     def transform(self, x):
         """Extract the given column_names from x.
 
-        :param x: pandas DataFrame from which the columns will be extracted.
-        :return: numpy array containing the extracted columns.
-        :raise InvalidArgumentError: If x is not a pandas DataFrame.
-        :raise KeyError: If the column names passed in the constructor of the
+        Parameters
+        ----------
+        x : pandas DataFrame
+            Pandas DataFrame from which the columns will be extracted.
+
+        Returns
+        -------
+        return : numpy array
+            Numpy array containing the extracted columns.
+
+        Raises
+        ------
+        InvalidArgumentError
+            If x is not a pandas DataFrame.
+
+        KeyError
+            If the column names passed in the constructor of the
             selector don't exist in the given DataFrame.
         """
         if not isinstance(x, pd.DataFrame):
-            raise InvalidArgumentError('x', 'Transform must receive a pandas Dataframe as argument')
+            raise InvalidArgumentError('x', 'Transform must receive a pandas '
+                                            'Dataframe as argument.')
 
         return x[self.column_names].values

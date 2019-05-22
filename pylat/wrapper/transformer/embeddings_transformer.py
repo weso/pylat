@@ -74,7 +74,6 @@ class WordEmbeddingsTransformer(TransformerMixin):
             to be transformed will be fed as training data to the embedding.
         y : :obj:`list`, optional (default=None)
             Labels of the passed data.
-        fit_params :
 
         Returns
         -------
@@ -88,7 +87,10 @@ class WordEmbeddingsTransformer(TransformerMixin):
     def transform(self, x, **transf_params):
         """Transforms the input text into numbers.
 
-        This method uses the embeddings trained in the fit method to
+        This method uses the embeddings trained in the fit method to obtain
+        the vector representation of the given texts. A vector will be returned
+        for each token in the texts, and these tokens combined compose the
+        numerical representation of each text.
 
         Parameters
         -----------
@@ -97,9 +99,11 @@ class WordEmbeddingsTransformer(TransformerMixin):
 
         Returns
         -------
-        return : numpy array of shape of shape [n, ]
+        return : numpy array
             Each row in the output array corresponds to each document in the
-            input array, and it contains a list of preprocessed tokens.
+            input array. If to_id was set to True, the second dimension will
+            contain the id of each token in the embedding. If it was set to
+            false, it will contain the embedding of each token.
         """
         func = self.embeddings.to_id if self._to_id \
             else self.embeddings.to_vector
@@ -153,31 +157,49 @@ class DocumentEmbeddingsTransformer(TransformerMixin):
         self._fit_corpus = fit_corpus
 
     def fit(self, x, y=None):
-        """
+        """Fits the document embeddings to the given data
+
+        Note
+        ----
+        If a fit_corpus was passed in the constructor of this class, that data
+        will be used to fit the embeddings instead.
 
         Parameters
         ----------
-        x
-        y
+        x : :obj:`list` of :obj:`list` of str
+            A 2 dimensional list, where the first dimension contains every
+            sentence used to train the embedding, and the second dimension
+            contains every token of each sentence. If set to None, the sentences
+            to be transformed will be fed as training data to the embedding.
+        y : :obj:`list`, optional (default=None)
+            Labels of the passed data.
 
         Returns
         -------
-
+        self
+            Reference to the class after being trained.
         """
         train_data = x if self._fit_corpus is None else self._fit_corpus
         self.embeddings.train(train_data)
         return self
 
     def transform(self, x):
-        """
+        """Transforms the input text into numbers.
+
+        This method uses the embeddings trained in the fit method to obtain a
+        vector representation of each given text.
 
         Parameters
-        ----------
-        x :
+        -----------
+        x : :obj:`list` of :obj:`list` of str
+            2 dimensional list, containing the tokens of every sentence.
 
         Returns
         -------
-
+        return : numpy array of shape of shape [n, m]
+            Each row in the output array corresponds to each document in the
+            input array, and it contains as many numbers ('m') as the dimension
+            of the embedding passed as a parameter.
         """
         return np.asarray([self.embeddings.to_vector(sentence)
                            for sentence in x])

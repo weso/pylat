@@ -13,7 +13,8 @@ class LexiconManager():
 
     Parameters
     ----------
-    lexicon_path: Path to the lexicon text file.
+    lexicon_path : str
+        Path to the lexicon text file.
 
     Examples
     --------
@@ -41,43 +42,72 @@ class LexiconManager():
                 self._lexicon[name] = LexiconRow(valence, arousal, dominance)
 
     def valence(self, text):
-        """ Returns the valence score for the given text.
+        """Returns the valence score for the given text.
 
         The valence score is a float between 0 and 1 that represents
         the pleasure--displeasure dimension of the text. A value near
         0 means that the text represents displeasure, while a value near
         1 means that the text represents pleasure.
 
-        :param text: Iterable of tokens present in the text.
-        :return: float normalized number with the valence score.
+        Parameters
+        ----------
+        text : :obj:`list` of str
+            Iterable of tokens present in the text.
+
+        Returns
+        -------
+        return : float
+            Normalized number with the valence score.
         """
         return self._obtain_lexicon_info('valence', text)
 
     def arousal(self, text):
-        """ Returns the arousal score for the given text.
+        """Returns the arousal score for the given text.
 
         The arousal score is a float between 0 and 1 that represents
         the active--passive dimension of the text. A value
 
-        :param text: String representation of the text.
-        :return: float normalized number with the arousal score.
+        Parameters
+        ----------
+        text : :obj:`list` of str
+            String representation of the text.
+
+        Returns
+        -------
+        return : float
+            Normalized number with the arousal score.
         """
         return self._obtain_lexicon_info('arousal', text)
 
     def dominance(self, text):
-        """ Returns the dominance score for the given text.
+        """Returns the dominance score for the given text.
 
-        :param text: String representation of the text
-        :return: float normalized number with the dominance score
+        Parameters
+        ----------
+        text : :obj:`list` of str
+            String representation of the text.
+
+        Returns
+        -------
+        return : float
+            Normalized number with the dominance score.
         """
         return self._obtain_lexicon_info('dominance', text)
 
     def _obtain_lexicon_info(self, variable, text):
         """ Calculates a specific dimension from the lexicon.
 
-        :param variable: Must be one of 'valence', 'arousal' and 'dominance'.
-        :param text: List of tokens which are present in the text.
-        :return: float normalized number with the specified score
+        Parameters
+        ----------
+        variable : str
+            Must be one of 'valence', 'arousal' and 'dominance'.
+        text : :obj:`list` of str
+            List of tokens which are present in the text.
+
+        Returns
+        -------
+        return : float
+            Normalized number with the specified score.
         """
         if not hasattr(text, '__iter__') or isinstance(text, str):
             raise InvalidArgumentError('text', 'Text must be an iterable of tokens')
@@ -91,7 +121,21 @@ class LexiconManager():
         return 0.5 if words_used == 0 else result / words_used
 
 
-class LexiconRow():
+class LexiconRow:
+    """Data class that represents every row present in the lexicon.
+
+    This class is used to store every possible value present in the NRC
+    valence, arousal and dominance lexicon.
+
+    Parameters
+    ----------
+    valence : float
+        Value of the valence score of the word.
+    arousal : float
+        Value of the arousal score of the word.
+    dominance : float
+        Value of the dominance score of the word.
+    """
     def __init__(self, valence, arousal, dominance):
         self.valence = valence
         self.arousal = arousal
