@@ -1,5 +1,6 @@
 from pylat.neuralnet.embeddings import GensimConfig, Word2VecEmbedding, \
     Doc2VecEmbedding, CrossLingualPretrainedEmbedding
+from pylat.neuralnet.utils import convert_vec_embedding
 from pylat.exceptions import InvalidArgumentError
 from gensim.models import Doc2Vec, Word2Vec
 
@@ -105,6 +106,20 @@ class TestEmbeddings(unittest.TestCase):
         embeddings = Word2VecEmbedding(conf)
         with pytest.raises(InvalidArgumentError):
             embeddings.train(self.invalid_input)
+
+    def test_embedding_conversion(self):
+        convert_vec_embedding(os.path.join(self.embeddings_dir, 'de.vec'),
+                              self.embeddings_dir)
+        vectors = np.load(os.path.join(self.embeddings_dir, 'de.npy'))
+        assert np.allclose(vectors, [[-0.011, -0.002, -0.051, 0.020, -0.069],
+                                     [-0.046, -0.000, -0.075, 0.027, -0.101],
+                                     [-0.032, -0.046, -0.008, 0.099, 0.014]],
+                           atol=1e-3)
+        with open(os.path.join(self.embeddings_dir, 'de.vocab'), 'r') as f:
+            vocab = f.readlines()
+            assert sorted(vocab) == sorted([',\n', '.\n', 'gut\n'])
+        os.remove(os.path.join(self.embeddings_dir, 'de.npy'))
+        os.remove(os.path.join(self.embeddings_dir, 'de.vocab'))
 
 
 if __name__ == '__main__':

@@ -2,7 +2,8 @@ from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.exceptions import NotFittedError
 from pylat.exceptions import InvalidArgumentError
 
-import en_core_web_sm, es_core_news_sm
+import en_core_web_sm
+import es_core_news_sm
 
 import numpy as np
 
@@ -36,7 +37,7 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
         natural language operations (parser, tagger, ner...). The model
         must have been imported first (see https://spacy.io/usage/models).
 
-    additional_pipes : iterable or None, optional (default=None)
+    additional_pipes : :obj:`list` or None, optional (default=None)
         Iterable of callables that will be appended to the original pipeline
         of the Spacy model. This callables receive a Doc object as input,
         and return another Doc object.
@@ -45,7 +46,8 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
         Whether to remove stop_words from the input text or not.
 
     lemmatize : boolean, optional (default=False)
-        Whether to return a lemmatized form of each token from the input text or not.
+        Whether to return a lemmatized form of each token from the input
+        text or not.
 
     Attributes
     ----------
@@ -58,11 +60,12 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
 
     model_caches : dict,
         Dictionary that keeps a cache of all the loaded nlp models. Its keys
-        are the string model ids, and its values are their respective nlp models.
+        are the string model ids, and its values are their respective
+        nlp models.
 
     Examples
     --------
-    >>> from pylat.wrapper.transformer.text_preprocessor import TextPreprocessor
+    >>> from pylat.wrapper.transformer import TextPreprocessor
     >>> X = ['Hi, how are you doing?']
     >>> base_preprocessor = TextPreprocessor()
     >>> print(base_preprocessor.fit_transform(X))
@@ -97,7 +100,9 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
         A dict of cached models is updated in order to avoid the expensive operation
         of loading a Language object.
 
-        :return: spacy.Language object
+        Returns
+        -------
+        return : spacy.Language object
             Spacy language model.
         """
         if self.spacy_model_id not in self.model_caches:
@@ -116,11 +121,23 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
         validates the params passed in the constructor, following
         sklearn conventions.
 
-        :param x: any
+        Parameters
+        ----------
+        x : any
             Not taken into account.
-        :param y: any (default=None)
+        y : any (default=None)
             Not taken into account.
-        :return: self
+
+        Returns
+        -------
+        returns : self
+            Fitted representation of the object
+
+        Raises
+        ------
+        InvalidArgumentError
+            If some of the parameters passed to the object in the constructor
+            are not valid.
         """
         self._assert_valid_types()
 
@@ -135,8 +152,13 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
     def transform(self, x):
         """Transforms the input text into preprocessed data.
 
-        :param x: array of strings of any shape (n)
-        :return: numpy array of shape of shape [n, ]
+        Parameters
+        ----------
+        x : array of strings of any shape (n)
+
+        Returns
+        -------
+        return : numpy array of shape of shape [n, ]
             Each row in the output array corresponds to each document in the
             input array, and it contains a list of preprocessed tokens.
         """
@@ -153,7 +175,8 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
     def _process(self, doc):
         tokens = np.asarray(doc)
         if self.remove_stop_words:
-            tokens = [tok for tok in tokens if not tok.is_stop and not tok.is_punct]
+            tokens = [tok for tok in tokens if not tok.is_stop
+                      and not tok.is_punct]
 
         if self.lemmatize:
             tokens = [tok.lemma_.lower().strip() if tok.lemma_ != '-PRON-'
@@ -193,14 +216,17 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
 
     def _assert_valid_types(self):
         if not isinstance(self.remove_stop_words, bool):
-            raise InvalidArgumentError('remove_stop_words', 'Remove stop words option must be True or False.')
+            raise InvalidArgumentError('remove_stop_words', 'Remove stop words '
+                                       'option must be True or False.')
 
         if not isinstance(self.lemmatize, bool):
-            raise InvalidArgumentError('lemmatize', 'Lemmatize option must be True or False.')
+            raise InvalidArgumentError('lemmatize', 'Lemmatize option must be '
+                                                    'True or False.')
 
         if not hasattr(self.additional_pipes, '__iter__'):
             logger.info('Additional pipes is: {}'.format(self.additional_pipes))
-            raise InvalidArgumentError('additional_pipes', 'Additional pipes must be an iterable of callables')
+            raise InvalidArgumentError('additional_pipes', 'Additional pipes '
+                                       'must be an iterable of callables')
 
         if self.spacy_model_id not in id2pkg.keys():
             raise InvalidArgumentError('spacy_model_id',
@@ -209,4 +235,5 @@ class TextPreprocessor(BaseEstimator, TransformerMixin):
 
         for pipe in self.additional_pipes:
             if not hasattr(pipe, '__call__'):
-                raise InvalidArgumentError('additional_pipes', "All additional pipes must be callables")
+                raise InvalidArgumentError('additional_pipes', 'All additional '
+                                           'pipes must be callables')

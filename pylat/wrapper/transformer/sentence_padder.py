@@ -3,23 +3,21 @@ import numpy as np
 from sklearn.base import BaseEstimator, TransformerMixin
 from pylat.exceptions import InvalidArgumentError
 
-__author__ = 'Alejandro González Hevia'
-
 
 class SentencePadder(BaseEstimator, TransformerMixin):
     """Pads sentences of word vectors for use in a recurrent neural network.
 
-    After preprocessing textual data and creating a vector representation of each word,
-    each input will have different dimensions (one per word). In order to use the data
-    in a recurrent neural network we need to pad every training instance with zeros up
-    to a certain dimension. This dimension can be the greatest of the training instances
-    or another one.
+    After preprocessing textual data and creating a vector representation of
+    each word, each input will have different dimensions (one per word). In
+    order to use the data in a recurrent neural network we need to pad every
+    training instance with zeros up to a certain dimension. This dimension can
+    be the greatest of the training instances or another one.
 
     Parameters
     ----------
     padding_length: int (default=None)
-        Output length of each sample instance. If set to None, the output length
-        will be equal to the max length from the sample set.
+        Output length of each sample instance. If set to None, the output
+        length will be equal to the max length from the sample set.
 
     Examples
     --------
@@ -44,16 +42,49 @@ class SentencePadder(BaseEstimator, TransformerMixin):
     def __init__(self, padding_length=None):
         self.padding_length = padding_length
 
-    def fit(self, x, y=None, **fit_params):
+    def fit(self, x, y=None):
+        """Fits the padder to the given data.
+
+        Parameters
+        ----------
+        x : :obj:`list` of :obj:`list`
+            List of lists with the numerical representation of each sentence.
+        y : :obj:`list`, optional (default=None)
+            List of labels of each sentence.
+
+        Returns
+        -------
+        self
+            Reference to the class after being trained.
+
+        Raises
+        ------
+        InvalidArgumentError
+            If the padding length is lower than the maximum length of the
+            sentences in the given array.
+        """
         max_length = len(max(x, key=len))
         if self.padding_length is not None and self.padding_length < max_length:
-            raise InvalidArgumentError('padding_length', 'Padding length must be greater \
-                                                          or equal to the maximum sentence length.')
+            raise InvalidArgumentError('padding_length',
+                                       'Padding length must be greater or \
+                                       equal to the maximum sentence length.')
         elif self.padding_length is None:
             self.padding_length = max_length
         return self
 
     def transform(self, x):
+        """Return the padded array.
+
+        Parameters
+        ----------
+        x : :obj:`list` of :obj:`list`
+            List of lists with the numerical representation of each sentence.
+
+        Returns
+        -------
+        numpy array
+            Padded array with as many columns as the given padding length.
+        """
         num_instances = len(x)
         ret = np.zeros(shape=[num_instances, self.padding_length],
                        dtype=np.float32)
