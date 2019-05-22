@@ -5,7 +5,7 @@ from pylat.exceptions import InvalidArgumentError
 import pytest
 
 
-class TestStatsMethods():
+class TestStatsMethods:
     def test_wilson_valid(self):
         error = 0.2
         n_samples = 300

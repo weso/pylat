@@ -1,10 +1,9 @@
-from pylat.wrapper.transformer.base import BaseTransformer
 from sklearn.base import TransformerMixin
 
 import numpy as np
 
 
-class WordEmbeddingsTransformer(BaseTransformer, TransformerMixin):
+class WordEmbeddingsTransformer(TransformerMixin):
     """Transform a list of tokens to numbers using a word embedding.
 
     This is a wrapper around word2vec, complying to the scikit-learn
@@ -112,7 +111,7 @@ class WordEmbeddingsTransformer(BaseTransformer, TransformerMixin):
         return self.fit(X, **params).transform(X, **params)
 
 
-class DocumentEmbeddingsTransformer(BaseTransformer):
+class DocumentEmbeddingsTransformer(TransformerMixin):
     """Transforms a list of sentences into their corresponding embeddings.
 
     This is a wrapper around doc2vec, complying to the scikit-learn
