@@ -4,9 +4,11 @@ from pylat.neuralnet import BaseTrainer, DenseLayer, EarlyStoppingTrainer, \
 from pylat.neuralnet.rnn import GRUCellFactory, LSTMCellFactory, \
     SimpleCellFactory, BidirectionalRecurrentLayer, RecurrentLayer,\
     RecurrentNeuralNetwork
+from pylat.wrapper.predictor import RNNWrapper
 
 from gensim.models import Word2Vec
 
+import numpy as np
 import tensorflow as tf
 import os
 import pytest
@@ -14,7 +16,6 @@ import unittest
 
 
 class TestRecurrentNeuralNetwork(unittest.TestCase):
-
     def setUp(self):
         embeddings_dir = os.path.join('test', 'data', 'embeddings')
         model = Word2Vec.load(os.path.join(embeddings_dir,
@@ -136,3 +137,102 @@ class TestRecurrentNeuralNetwork(unittest.TestCase):
                 return
         self.assertFalse(True, 'Operation {} was not found '
                                'in the model'.format(op_name))
+
+
+class TestMetamorphicRelations(unittest.TestCase):
+    def setUp(self):
+        self._load_embeddings()
+        self._load_data()
+        self._load_model()
+
+    def test_mr_additional_samples(self):
+        """Test the additional samples metamorphic relationship.
+
+        If additional samples with have label li are added before training the
+        model, previous samples that were predicted with label li should still
+        have the same label.
+        """
+        self.x_train.append([2, 1, 0, 0])
+        self.y_train.append(0)
+        self.model.fit(self.x_train, self.y_train)
+        assert self.model.predict(self.x_val)[0] == 0
+
+    def test_mr_permutation_attributes(self):
+        """Test the attributes permutation metamorphic relationship.
+
+        If the attributes are permutated, output should still be the same.
+        """
+        self.model.fit(self.x_train, self.y_train)
+        output = self.model.predict(self.x_val)
+        x_train_perm = [[3, 0, 0, 0],
+                        [3, 0, 0, 0],
+                        [3, 1, 1, 1],
+                        [3, 0, 0, 0],
+                        [3, 2, 2, 2],
+                        [3, 1, 1, 1]]
+        self._load_model()
+        self.model.fit(x_train_perm, self.y_train)
+        assert np.array_equal(output, self.model.predict(self.x_val))
+
+    def test_mr_prediction_consistence(self):
+        """Test the prediction consistence metamorphic relationship.
+
+        Output should be the same in every prediction on the same data.
+        """
+        self.model.fit(self.x_train, self.y_train)
+        output = self.model.predict(self.x_val)
+        for i in range(50):
+            assert np.array_equal(output, self.model.predict(self.x_val))
+
+    def test_mr_removal_samples(self):
+        """Test the samples removal metamorphic relationship.
+
+        If some samples whose label is not li are removed, output
+        for data which is predicted as li should still be the same.
+        """
+        del self.x_train[3]
+        del self.y_train[3]
+        self.model.fit(self.x_train, self.y_train)
+        assert self.model.predict(self.x_val)[0] == 0
+
+    def test_mr_removal_classes(self):
+        """Test the classes removal metamorphic relationship.
+
+        If some class which is not is not li is removed, output
+        for data which is predicted as li should still be the same.
+        """
+        del self.x_train[3]
+        del self.y_train[3]
+        del self.x_train[4]
+        del self.y_train[4]
+        self.model.fit(self.x_train, self.y_train)
+        assert self.model.predict(self.x_val)[0] == 0
+
+    def _load_embeddings(self):
+        embeddings_dir = os.path.join('test', 'data', 'embeddings')
+        model = Word2Vec.load(os.path.join(embeddings_dir,
+                                           'w2v_test.model'))
+        self.embeddings = Word2VecEmbedding(model=model)
+
+    def _load_data(self):
+        self.x_train = [[0, 3, 0, 0],
+                        [0, 3, 0, 0],
+                        [1, 3, 1, 1],
+                        [0, 3, 0, 0],
+                        [2, 3, 2, 2],
+                        [1, 3, 1, 1]]
+        self.y_train = [0, 0, 1, 0, 2, 1]
+        self.x_val = [
+            [0, 3, 0, 0],
+            [1, 3, 1, 1],
+            [2, 3, 2, 2]
+        ]
+        self.y_val = [0, 1, 2]
+
+    def _load_model(self):
+        tf.reset_default_graph()
+        rnn_layers = [RecurrentLayer(num_units=3,
+                                     cell_factory=GRUCellFactory())]
+        fc_layers = [DenseLayer(num_units=5)]
+        self.model = RNNWrapper(rnn_layers, fc_layers,
+                                embeddings=self.embeddings, num_epochs=6)
