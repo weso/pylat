@@ -90,5 +90,6 @@ class SentencePadder(BaseEstimator, TransformerMixin):
                        dtype=np.float32)
         for idx, sentence in enumerate(x):
             if len(sentence) != 0:
-                ret[idx, :len(sentence)] = sentence
+                shortened_sentence = sentence[:self.padding_length]
+                ret[idx, :len(shortened_sentence)] = shortened_sentence
         return ret
