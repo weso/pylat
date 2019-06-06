@@ -82,7 +82,7 @@ class SentencePadder(BaseEstimator, TransformerMixin):
 
         Returns
         -------
-        numpy array
+        :obj:`np.array`
             Padded array with as many columns as the given padding length.
         """
         num_instances = len(x)

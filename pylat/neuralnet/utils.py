@@ -27,14 +27,18 @@ def get_next_batch(x, y, batch_idx, batch_size):
 def convert_vec_embedding(input_file, output_dir):
     """Converts a .vec file into the format used by the Embedding classes.
 
+    This method converts a .vec file into two different files used by the
+    WordEmbedding classes. The first one is a .npy file that holds the
+    weights of each token. The second one is a .vocab file that contains
+    the ordered list of words contained in the embedding.
+
     Parameters
     ----------
-    input_file
-    output_dir
+    input_file : str
+        Path of the .vec file to be converted.
 
-    Returns
-    -------
-
+    output_dir : str
+        Directory where the new converted files will be saved.
     """
     path = Path(input_file)
     file_name = path.stem

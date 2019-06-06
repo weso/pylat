@@ -45,7 +45,7 @@ class BaseEmbedding(ABC):
 
         Returns
         -------
-        list of float
+        :obj:`list` of float
             Vector representation of the input text.
         """
         pass
@@ -232,6 +232,8 @@ class BaseWordEmbedding(BaseEmbedding, ABC):
 
 
 class Word2VecEmbedding(BaseWordEmbedding):
+    """Class that transforms words into vectors using Word2Vec."""
+
     def __init__(self, gensim_conf=GensimConfig(), model=None):
         self.conf = gensim_conf
         self.model = model
@@ -262,6 +264,18 @@ class Word2VecEmbedding(BaseWordEmbedding):
         return self.model.wv.vectors
 
     def save_embeddings(self, save_path):
+        """Save the embeddings to a given directory.
+
+        The embeddings will be saved in two different files. A .vocab file that
+        will hold all of the vocabulary learnt by the Word2Vec model in a list
+        of words. The second one is a .npy file that store the weights of each
+        word.
+
+        Parameters
+        ----------
+        save_path : str
+            Directory where the embedding will be saved.
+        """
         np.save(save_path + '.npy', self.model.wv.vectors)
         with codecs.open(save_path + '.vocab', 'w', 'utf-8') as f_out:
             for word in self.model.wv.index2word:
@@ -269,6 +283,21 @@ class Word2VecEmbedding(BaseWordEmbedding):
 
 
 class CrossLingualPretrainedEmbedding(BaseWordEmbedding):
+    """Class that transforms words into vectors using pretrained embeddings.
+
+    This class is meant to be used with embeddings for several languages
+    aligned in a common vector space. All of the embeddings must belong to the
+    same folder. The language used by the class can be changed at runtime.
+
+    Parameters
+    ----------
+    embeddings_dir : str
+        Directory where the pretrained embeddings are located.
+    language : str, optional (default=None)
+        Language to use by the class. If set to None, English language will be
+        used by default.
+    """
+
     def __init__(self, embeddings_dir, language=None):
         self.embeddings_dir = embeddings_dir
         self.embeddings_dict = {}
@@ -286,6 +315,13 @@ class CrossLingualPretrainedEmbedding(BaseWordEmbedding):
             return None
 
     def set_language(self, language):
+        """Change the language used by the embeddings internally.
+
+        Parameters
+        ----------
+        language : str
+            Language to use by the class.
+        """
         self.language = language
 
     def to_id(self, token):
@@ -335,11 +371,16 @@ class CrossLingualPretrainedEmbedding(BaseWordEmbedding):
                                        'directory.'.format(language))
 
     class LoadedEmbedding:
-        """Inner class that stores information about the preloaded embeddings.
+        """Inner class that stores information about the loaded embeddings.
 
         Parameters
         ----------
-
+        wv : :obj:`np.array`
+            Matrix with all the word vectors.
+        index2word : :obj:`list` of str
+            Ordered list with every word of the embeddings.
+        word2index : dict
+            Dictionary that maps every word to its internal index.
         """
         def __init__(self, wv, index2word, word2index):
             self.wv = wv

@@ -9,14 +9,19 @@ from .utils import get_next_batch
 
 
 class BaseTrainer(ABC):
-    """
+    """Base class of neural network trainers.
+
+    This class provides a basic implementation for training any type of neural
+    network that conforms to the interface provided by the
+    :obj:`BaseNeuralNetwork` class.
 
     Parameters
     ----------
-    num_epochs: int (default=200)
+    model : :obj:`BaseNeuralNetwork` subclass
+        Neural network model to be trained.
+    num_epochs : int, optional (default=200)
         Maximum number of epochs taken during the training phase.
-
-    batch_size: int (default=30)
+    batch_size : int, optional (default=30)
         Number of training instances used for each gradient update
         in the training phase.
     """
@@ -33,6 +38,15 @@ class BaseTrainer(ABC):
         self._epochs_completed = 0
 
     def train(self, X, y):
+        """Train the neural network model with the given data.
+
+        Parameters
+        ----------
+        X : :obj:`np.array`
+            Two dimensional array containing the training instances.
+        y : list
+            List containing the labels of each instance.
+        """
         self.logger.info('Creating model...')
         self.model.init_model(X, y)
         self.saver = tf.train.Saver()
@@ -71,21 +85,85 @@ class BaseTrainer(ABC):
         return self.on_epoch_finished(train_loss, train_accuracy)
 
     def on_train_loop_started(self, X, y):
+        """Perform additional operations before the beginning of the first epoch
+
+        Parameters
+        ----------
+        X : :obj:`np.array`
+            Two dimensional array containing the training instances.
+        y : list
+            List containing the labels of each instance.
+        """
         self._epochs_completed = 0
         self.X_train = X
         self.y_train = y
 
     def on_epoch_finished(self, loss, acc):
+        """Perform additional operations once a training epoch is finished.
+
+        Parameters
+        ----------
+        loss : float
+            Loss value between 0 and 1 of the network at the end of the epoch.
+        acc : float
+            Accuracy value between 0 and 1of the network at the end of the
+            epoch.
+
+        Returns
+        -------
+        bool
+            Whether the training should stop after this epoch.
+        """
         self.logger.info('Train: Loss = {:.3f} - Accuracy = {:.3f}'.format(
             loss, acc * 100))
         self._epochs_completed += 1
         return False
 
     def on_train_finished(self):
+        """Perform additional operations once the training is finished.
+
+        This method can be overridden by other training classes to
+        perform additional steps once all of the training epochs have
+        been finished.
+        """
         pass
 
 
 class EarlyStoppingTrainer(BaseTrainer):
+    """Train a neural network with early stopping.
+
+    This class inherits from the :obj:`BaseTrainer` class to provide early
+    stopping capabilities to the training phase. This means that a validation
+    set will be used to evaluate how the network is performing after each
+    training epoch. If the loss is increasing several epochs in a row, the
+    training will finish and the weights of the network where the loss was
+    minimized will be restored.
+
+    Parameters
+    ----------
+    model : :obj:`BaseNeuralNetwork` subclass
+        Neural network model to be trained.
+    num_epochs : int
+        Maximum number of epochs taken during the training phase.
+    batch_size : int
+        Number of training instances used for each gradient update
+        in the training phase.
+    validation_split : float, optional (default=0.2)
+        Percentage of the training data that should be separated to
+        validation purposes.
+    validation_data : :obj:`tuple`, optional (default=None)
+        Tuple of the form (X_val, y_val) with the validation instances and
+        labels used in the training phase. If this tuple is provided, the
+        validation_split parameter will be ignored.
+    max_epochs_no_progress : int, optional (default=5)
+        Maximum number of epochs that the network will be trained with
+        consecutive increases in the loss. After this number is surpassed
+        the training will be stopped.
+    random_seed : int, optional (default=42)
+        Random seed used to divide the training data into a validation and
+        train sets.
+    """
+
     def __init__(self, model, num_epochs, batch_size,
                  validation_split=0.2, validation_data=None,
                  max_epochs_no_progress=5, random_seed=42):
