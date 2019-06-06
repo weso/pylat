@@ -12,43 +12,32 @@ import logging
 class RecurrentNeuralNetwork(BaseNeuralNetwork):
     """Recurrent neural network implementation using TensorFlow.
 
+    This class inherits from the :obj:`BaseNeuralNetwork` abstract class and
+    provides an example of a recurrent neural network implementation using
+    TensorFlow.
+
+    It can be fully customizable using different types of layers, and can be
+    trained with any class that fulfills the :obj:`BaseTrainer` interface.
+
     Parameters
     ----------
-    num_epochs: int (default=100)
-        Maximum number of epochs taken during the training phase.
-
-    batch_size: int (default=200)
-        Number of training instances used for each gradient update
-        in the training phase.
-
-    num_units: tuple or list of ints (default=(256,))
-        Tuple containing the number of units that each recurrent layer will have. If
-        the tuple contains more than one element, the recurrent layers will be stacked
-        using a MultiRNNCell.
-
-    cell_factory: BaseCellFactory object (default=GRUCellFactory())
-        Instance of a cell factory that will be used to create the cells of each
-        recurrent layer. For more info see :mod:`.rnn_cells`.
-
-    activation: callable (default=None)
-        Activation function applied to the output of each layer (e.g. tanh, ReLU...).
-
-    kernel_initializer: callable (default=he_init)
-        Function used to initialize the weights of the different layers.
-
-    layer_norm: bool (default=False)
-        Whether to apply layer normalization to each layer or not.
-
-    dropout_rate: float (default=None)
-        Dropout rate of each layer. Its value must be between 0 or 1.
-        If its value is None or 0, no dropout is applied.
-
-    learning_rate: float (default=1e-4)
+    rnn_layers : :obj:`list` of :obj:`RecurrentLayer`
+        List of recurrent layers that will compose the neural network. These
+        layers will be the first ones to receive the input of the embeddings.
+    fc_layers : :obj:`list` of :obj:`DenseLayer`
+        List of dense layers that will receive the output of the recurrent
+        layers.
+    learning_rate : float, optional (default=1e-4)
         Learning rate used by the optimizer during the training phase.
-
-    optimizer: tf.train.Optimizer class (default=tf.train.AdamOptimizer)
+    optimizer : :obj:`tf.train.Optimizer` class (default=tf.train.AdamOptimizer)
         Optimizer used during the training phase to minimize the loss
         function.
+    save_dir : str, optional (default='results')
+        Directory where the neural network will be saved during training.
+    random_seed : int, optional (default=42)
+        Random seed used to initialize the TensorFlow operations.
+    embeddings : :obj:`WordEmbeddings`, optional (default=None)
+        WordEmbeddings class used to load the word vectors from the input data.
 
     Attributes
     ----------
