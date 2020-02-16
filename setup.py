@@ -2,11 +2,11 @@ from setuptools import setup
 
 setup(
     name='pylat',
-    version='0.1.0a1',
-    packages=['pylat', 'pylat.data', 'pylat.util', 'pylat.wrapper',
+    version='0.2.1',
+    packages=['pylat', 'pylat.evaluation', 'pylat.wrapper',
               'pylat.wrapper.predictor', 'pylat.wrapper.transformer',
               'pylat.neuralnet', 'pylat.neuralnet.rnn'],
-    url='https://github.com/alejgh/pylat',
+    url='https://github.com/weso/pylat',
     license='GPL-3.0',
     author='Alejandro González Hevia',
     author_email='alejandrgh11@gmail.com',
