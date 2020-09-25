@@ -13,7 +13,7 @@ setup(
     description='A simple library with some common nlp operations',
     install_requires=[
         'gensim', 'scikit-learn', 'numpy', 'pandas',
-        'spacy==2.0.18', 'tensorflow==1.13.1', 'xmltodict',
+        'spacy==2.0.18', 'tensorflow==1.15.4', 'xmltodict',
         'en_core_web_sm', 'es_core_news_sm'
     ],
     dependency_links=[
